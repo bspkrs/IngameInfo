@@ -1,2 +1,3 @@
-TreeCapitator-FML
+IngameInfo
 =================
+IngameInfo ModLoader class
