@@ -193,11 +193,11 @@ public class mod_ingameInfo extends BaseMod
 
     private int getY(int rowCount, int rowNum)
     {
-    	if(alignMode == 3 || alignMode == 4 || alignMode == 5)
+        if(alignMode == 3 || alignMode == 4 || alignMode == 5)
             return (scaledResolution.getScaledHeight() / 2) - (rowCount * 10 / 2) + (rowNum*10) + yOffset[alignMode];
-    	else if(alignMode == 6 || alignMode == 7 || alignMode == 8)
+        else if(alignMode == 6 || alignMode == 7 || alignMode == 8)
             return scaledResolution.getScaledHeight() - (rowCount*10) + (rowNum*10) - yOffset[alignMode];
-    	else
+        else
             return (rowNum*10) + yOffset[alignMode];
     }
 
@@ -242,36 +242,36 @@ public class mod_ingameInfo extends BaseMod
         
         if(s.toLowerCase().startsWith("max"))
         {
-        	int startIndex = s.indexOf('[');
-        	int endIndex = s.indexOf('[', startIndex + 1);
-        	int divIndex = s.indexOf('/');
+            int startIndex = s.indexOf('[');
+            int endIndex = s.indexOf('[', startIndex + 1);
+            int divIndex = s.indexOf('/');
             if(s.indexOf('[') == -1 || endIndex == -1 || endIndex < divIndex)
-            	return "(ERROR: Incorrect syntax in MAX tag)";
+                return "(ERROR: Incorrect syntax in MAX tag)";
             else
             {
-            	try
-            	{
-            		float val1 = Float.valueOf(getTag(s.substring(startIndex+1, divIndex).replace("<","").replace(">","")));
-            		float val2 = Float.valueOf(getTag(s.substring(divIndex+1, endIndex).replace("<","").replace(">","")));
-            		return parseBoolean(s.substring(endIndex), val1 >= val2);
-            	}
-            	catch (NumberFormatException e)
-            	{
-            		return "(MAX tag: NumberFormatException: '" + s.substring(startIndex+1, divIndex) + "', '" + s.substring(divIndex+1,endIndex) + "')";
-            	}
+                try
+                {
+                    float val1 = Float.valueOf(getTag(s.substring(startIndex+1, divIndex).replace("<","").replace(">","")));
+                    float val2 = Float.valueOf(getTag(s.substring(divIndex+1, endIndex).replace("<","").replace(">","")));
+                    return parseBoolean(s.substring(endIndex), val1 >= val2);
+                }
+                catch (NumberFormatException e)
+                {
+                    return "(MAX tag: NumberFormatException: '" + s.substring(startIndex+1, divIndex) + "', '" + s.substring(divIndex+1,endIndex) + "')";
+                }
             }
         }
         if(s.toLowerCase().startsWith("pct"))
         {
             try
             {
-            	float value = Float.valueOf(getTag(s.substring(s.indexOf('(') + 1, s.indexOf(',')).replace("<","").replace(">","")));
-            	float pct = Float.valueOf(getTag(s.substring(s.indexOf(',') + 1, s.indexOf(')')).replace("<","").replace(">",""))) / 100F;
-            	return String.valueOf(MathHelper.floor_double(value * pct));
+                float value = Float.valueOf(getTag(s.substring(s.indexOf('(') + 1, s.indexOf(',')).replace("<","").replace(">","")));
+                float pct = Float.valueOf(getTag(s.substring(s.indexOf(',') + 1, s.indexOf(')')).replace("<","").replace(">",""))) / 100F;
+                return String.valueOf(MathHelper.floor_double(value * pct));
             }
             catch (NumberFormatException e)
             {
-            	return "(PCT tag: NumberFormatException: '" + s + "')";
+                return "(PCT tag: NumberFormatException: '" + s + "')";
             }
         }
 
@@ -443,7 +443,7 @@ public class mod_ingameInfo extends BaseMod
             if(fmt.equals(""))
                 fmt = "hh:mma";
             
-        	return new SimpleDateFormat(fmt).format(new Date());
+            return new SimpleDateFormat(fmt).format(new Date());
         }
         if(s.toLowerCase().startsWith("mctime"))
         {
@@ -454,7 +454,7 @@ public class mod_ingameInfo extends BaseMod
             if(startIndex != -1 && endIndex != -1 && s.substring(startIndex + 1, endIndex).equals("24"))
                 fmt = 24L;
             
-        	return CommonUtils.getMCTimeString(mc.theWorld.getWorldTime(), fmt);
+            return CommonUtils.getMCTimeString(mc.theWorld.getWorldTime(), fmt);
         }
         if(s.equalsIgnoreCase("day"))
         {
@@ -513,84 +513,84 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.equalsIgnoreCase("light"))
         {
-        	try
-        	{
-        		return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, coord.y, coord.z & 0xf, 
-        		        world.calculateSkylightSubtracted(1.0F)));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "0";
-        	}
+            try
+            {
+                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, coord.y, coord.z & 0xf, 
+                        world.calculateSkylightSubtracted(1.0F)));
+            }
+            catch(Throwable e)
+            {
+                return "0";
+            }
         }
         if(s.equalsIgnoreCase("lightfeet"))
         {
-        	try
-        	{
-        		return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, 
-        		        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "0";
-        	}
+            try
+            {
+                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, 
+                        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
+            }
+            catch(Throwable e)
+            {
+                return "0";
+            }
         }
         if(s.equalsIgnoreCase("lightnosun"))
         {
-        	try
-        	{
-        		return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, 
-        		        coord.x & 0xf, coord.y, coord.z & 0xf));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "0";
-        	}
+            try
+            {
+                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, 
+                        coord.x & 0xf, coord.y, coord.z & 0xf));
+            }
+            catch(Throwable e)
+            {
+                return "0";
+            }
         }
         if(s.equalsIgnoreCase("lightnosunfeet"))
         {
-        	try
-        	{
-        		return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, 
-        		        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "0";
-        	}
+            try
+            {
+                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, 
+                        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
+            }
+            catch(Throwable e)
+            {
+                return "0";
+            }
         }
         if(s.equalsIgnoreCase("x") || s.equalsIgnoreCase("xi"))
         {
-        	return Integer.toString(coord.x);
+            return Integer.toString(coord.x);
         }
         if(s.equalsIgnoreCase("y") || s.equalsIgnoreCase("yi"))
         {
-        	return Integer.toString(coord.y);
+            return Integer.toString(coord.y);
         }
         if(s.equalsIgnoreCase("yfeet") || s.equalsIgnoreCase("yfeeti"))
         {
-        	return Integer.toString((int) Math.round(mc.thePlayer.boundingBox.minY));
+            return Integer.toString((int) Math.round(mc.thePlayer.boundingBox.minY));
         }
         if(s.equalsIgnoreCase("z") || s.equalsIgnoreCase("zi"))
         {
-        	return Integer.toString(coord.z);
+            return Integer.toString(coord.z);
         }
-		if (s.equalsIgnoreCase("decx")) 
-		{
-			return Double.toString(Math.round(mc.thePlayer.posX * 10.0) / 10.0);
-		}
-		if (s.equalsIgnoreCase("decy")) 
-		{
-			return Double.toString(Math.round(mc.thePlayer.posY * 10.0) / 10.0);
-		}
-		if (s.equalsIgnoreCase("decyfeet")) 
-		{
-			return Double.toString(Math.round(mc.thePlayer.boundingBox.minY * 10.0) / 10.0);
-		}
-		if (s.equalsIgnoreCase("decz")) 
-		{
-			return Double.toString(Math.round(mc.thePlayer.posZ * 10.0) / 10.0);
-		}
+        if (s.equalsIgnoreCase("decx")) 
+        {
+            return Double.toString(Math.round(mc.thePlayer.posX * 10.0) / 10.0);
+        }
+        if (s.equalsIgnoreCase("decy")) 
+        {
+            return Double.toString(Math.round(mc.thePlayer.posY * 10.0) / 10.0);
+        }
+        if (s.equalsIgnoreCase("decyfeet")) 
+        {
+            return Double.toString(Math.round(mc.thePlayer.boundingBox.minY * 10.0) / 10.0);
+        }
+        if (s.equalsIgnoreCase("decz")) 
+        {
+            return Double.toString(Math.round(mc.thePlayer.posZ * 10.0) / 10.0);
+        }
         if(s.equalsIgnoreCase("worldname"))
         {
             try
@@ -637,107 +637,107 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.equalsIgnoreCase("roughdirection"))
         {
-        	try
-        	{
-	            switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
-	            {
-	            case 0:	return "South";
-	            case 1: return "West";
-	            case 2: return "North";
-	            case 3: return "East";
-	            }
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
+                {
+                case 0:    return "South";
+                case 1: return "West";
+                case 2: return "North";
+                case 3: return "East";
+                }
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         if(s.equalsIgnoreCase("finedirection"))
         {
-        	try
-        	{
-	            switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
-	            {
-	            case 0:	return "South";
-	            case 1: return "South West";
-	            case 2: return "West";
-	            case 3: return "North West";
-	            case 4: return "North";
-	            case 5: return "North East";
-	            case 6: return "East";
-	            case 7: return "South East";
-	            }
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
+                {
+                case 0:    return "South";
+                case 1: return "South West";
+                case 2: return "West";
+                case 3: return "North West";
+                case 4: return "North";
+                case 5: return "North East";
+                case 6: return "East";
+                case 7: return "South East";
+                }
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         if(s.equalsIgnoreCase("abrroughdirection"))
         {
-        	try
-        	{
-	            switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
-	            {
-	            case 0:	return "S";
-	            case 1: return "W";
-	            case 2: return "N";
-	            case 3: return "E";
-	            }
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
+                {
+                case 0:    return "S";
+                case 1: return "W";
+                case 2: return "N";
+                case 3: return "E";
+                }
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         if(s.equalsIgnoreCase("abrfinedirection"))
         {
-        	try
-        	{
-	            switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
-	            {
-	            case 0:	return "S";
-	            case 1: return "SW";
-	            case 2: return "W";
-	            case 3: return "NW";
-	            case 4: return "N";
-	            case 5: return "NE";
-	            case 6: return "E";
-	            case 7: return "SE";
-	            }
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
+                {
+                case 0:    return "S";
+                case 1: return "SW";
+                case 2: return "W";
+                case 3: return "NW";
+                case 4: return "N";
+                case 5: return "NE";
+                case 6: return "E";
+                case 7: return "SE";
+                }
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         if(s.equalsIgnoreCase("directionhud"))
         {
-        	try
-        	{
-	            int direction = MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 16F) / 360F) + 0.5D) & 15;
-	            if(direction == 0)  return "SE   &cS &f  SW";
-	            if(direction == 1)  return "  S    SW  ";
-	            if(direction == 2)  return "S    &cSW&f    W";
-	            if(direction == 3)  return "  SW    W  ";
-	            if(direction == 4)  return "SW   &cW &f  NW";
-	            if(direction == 5)  return "  W    NW  ";
-	            if(direction == 6)  return "W    &cNW&f    N";
-	            if(direction == 7)  return "  NW    N  ";
-	            if(direction == 8)  return "NW   &cN &f  NE";
-	            if(direction == 9)  return "  N    NE  ";
-	            if(direction == 10) return "N    &cNE&f    E";
-	            if(direction == 11) return "  NE    E  ";
-	            if(direction == 12) return "NE   &cE &f  SE";
-	            if(direction == 13) return "  E    SE  ";
-	            if(direction == 14) return "E    &cSE&f    S";
-	            if(direction == 15) return "  SE    S  ";
-	            else return "this shit isn't working";
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                int direction = MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 16F) / 360F) + 0.5D) & 15;
+                if(direction == 0)  return "SE   &cS &f  SW";
+                if(direction == 1)  return "  S    SW  ";
+                if(direction == 2)  return "S    &cSW&f    W";
+                if(direction == 3)  return "  SW    W  ";
+                if(direction == 4)  return "SW   &cW &f  NW";
+                if(direction == 5)  return "  W    NW  ";
+                if(direction == 6)  return "W    &cNW&f    N";
+                if(direction == 7)  return "  NW    N  ";
+                if(direction == 8)  return "NW   &cN &f  NE";
+                if(direction == 9)  return "  N    NE  ";
+                if(direction == 10) return "N    &cNE&f    E";
+                if(direction == 11) return "  NE    E  ";
+                if(direction == 12) return "NE   &cE &f  SE";
+                if(direction == 13) return "  E    SE  ";
+                if(direction == 14) return "E    &cSE&f    S";
+                if(direction == 15) return "  SE    S  ";
+                else return "this shit isn't working";
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         
         /*
@@ -747,103 +747,103 @@ public class mod_ingameInfo extends BaseMod
         
         if(s.equalsIgnoreCase("fps"))
         {
-        	try
-        	{
-        		return mc.debug.substring(0, mc.debug.indexOf(" fps"));
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "0";
-	    	}
+            try
+            {
+                return mc.debug.substring(0, mc.debug.indexOf(" fps"));
+            }
+            catch(Throwable e)
+            {
+                return "0";
+            }
         }
         if (s.equalsIgnoreCase("entitiesrendered")) 
         {
-        	try
-        	{
-				String str = mc.getEntityDebug();
-				return str.substring(str.indexOf(' ') + 1, str.indexOf('/'));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                String str = mc.getEntityDebug();
+                return str.substring(str.indexOf(' ') + 1, str.indexOf('/'));
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         if (s.equalsIgnoreCase("entitiestotal")) 
         {
-        	try
-        	{
-				String str = mc.getEntityDebug();
-				return str.substring(str.indexOf('/') + 1, str.indexOf('.'));
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                String str = mc.getEntityDebug();
+                return str.substring(str.indexOf('/') + 1, str.indexOf('.'));
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         if (s.equalsIgnoreCase("memtotal")) 
         {
-        	try
-        	{
-        		if(memoryUnit.equalsIgnoreCase("KB"))
-        			return Long.toString(Runtime.getRuntime().totalMemory() / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("MB"))
-        			return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("GB"))
-        			return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L / 1024L) + memoryUnit;
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                if(memoryUnit.equalsIgnoreCase("KB"))
+                    return Long.toString(Runtime.getRuntime().totalMemory() / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("MB"))
+                    return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("GB"))
+                    return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L / 1024L) + memoryUnit;
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         if (s.equalsIgnoreCase("memmax")) 
         {
-        	try
-        	{
-        		if(memoryUnit.equalsIgnoreCase("KB"))
-        			return Long.toString(Runtime.getRuntime().maxMemory() / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("MB"))
-        			return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("GB"))
-        			return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L / 1024L) + memoryUnit;
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                if(memoryUnit.equalsIgnoreCase("KB"))
+                    return Long.toString(Runtime.getRuntime().maxMemory() / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("MB"))
+                    return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("GB"))
+                    return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L / 1024L) + memoryUnit;
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         if (s.equalsIgnoreCase("memfree")) 
         {
-        	try
-        	{
-        		if(memoryUnit.equalsIgnoreCase("KB"))
-        			return Long.toString(Runtime.getRuntime().freeMemory() / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("MB"))
-        			return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("GB"))
-        			return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L / 1024L) + memoryUnit;
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                if(memoryUnit.equalsIgnoreCase("KB"))
+                    return Long.toString(Runtime.getRuntime().freeMemory() / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("MB"))
+                    return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("GB"))
+                    return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L / 1024L) + memoryUnit;
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         if (s.equalsIgnoreCase("memused")) 
         {
-        	try
-        	{
-        		if(memoryUnit.equalsIgnoreCase("KB"))
-        			return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("MB"))
-        			return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L) + memoryUnit;
-        		if(memoryUnit.equalsIgnoreCase("GB"))
-        			return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L / 1024L) + memoryUnit;
-        	}
-        	catch(Throwable e)
-        	{
-        		return "&onull";
-        	}
-		}
+            try
+            {
+                if(memoryUnit.equalsIgnoreCase("KB"))
+                    return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("MB"))
+                    return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L) + memoryUnit;
+                if(memoryUnit.equalsIgnoreCase("GB"))
+                    return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L / 1024L) + memoryUnit;
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
+        }
         
         /*
          * ********************************************************************************************************************
@@ -852,24 +852,24 @@ public class mod_ingameInfo extends BaseMod
         
         if(s.equalsIgnoreCase("gamemode"))
         {
-        	try
-        	{
-        		if(mc.thePlayer.capabilities.isCreativeMode) 
-        			return "Creative";
-        		else
-        			if(world.worldInfo.getGameType().equals(EnumGameType.SURVIVAL))
-        				return "Survival";
-        			else if(world.worldInfo.getGameType().equals(EnumGameType.CREATIVE))
-        				return "Creative/Survival?";
-        			else if(world.worldInfo.getGameType().equals(EnumGameType.ADVENTURE))
-        				return "Adventure";
-        			else
-        				return "???";
-	    	}
-	    	catch(Throwable e)
-	    	{
-	    		return "&onull";
-	    	}
+            try
+            {
+                if(mc.thePlayer.capabilities.isCreativeMode) 
+                    return "Creative";
+                else
+                    if(world.worldInfo.getGameType().equals(EnumGameType.SURVIVAL))
+                        return "Survival";
+                    else if(world.worldInfo.getGameType().equals(EnumGameType.CREATIVE))
+                        return "Creative/Survival?";
+                    else if(world.worldInfo.getGameType().equals(EnumGameType.ADVENTURE))
+                        return "Adventure";
+                    else
+                        return "???";
+            }
+            catch(Throwable e)
+            {
+                return "&onull";
+            }
         }
         if(s.equalsIgnoreCase("score"))
         {
@@ -919,8 +919,8 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.equalsIgnoreCase("equippedname"))
         {
-        	String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.shiftedIndex 
-        	        ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.shiftedIndex) + ")" : "";
+            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.shiftedIndex 
+                    ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.shiftedIndex) + ")" : "";
             return mc.thePlayer.getCurrentEquippedItem() != null 
                     ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getItemName()) + arrows : "";
         }
@@ -1021,15 +1021,15 @@ public class mod_ingameInfo extends BaseMod
         }
         else
         {
-        	try
-        	{
-        		Float.valueOf(s);
-        		return s;
-        	}
-        	catch(Throwable e)
-        	{
-        		return "";
-        	}
+            try
+            {
+                Float.valueOf(s);
+                return s;
+            }
+            catch(Throwable e)
+            {
+                return "";
+            }
         }
     }
 
