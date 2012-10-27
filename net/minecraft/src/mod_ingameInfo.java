@@ -35,7 +35,7 @@ public class mod_ingameInfo extends BaseMod
     
     private boolean checkUpdate;
     private ModVersionChecker versionChecker;
-    private String versionURL = "https://dl.dropbox.com/u/20748481/Minecraft/1.3.1/ingameInfo.version";
+    private String versionURL = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.2/ingameInfo.version";
     private String mcfTopic = "http://www.minecraftforum.net/topic/1009577-";
 
     @Override
@@ -47,7 +47,7 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.3.2.r01";
+        return "ML 1.4.2.r01";
     }
 
     public mod_ingameInfo()
@@ -234,6 +234,8 @@ public class mod_ingameInfo extends BaseMod
         
         World world = mc.isIntegratedServerRunning() 
                 ? mc.getIntegratedServer().worldServerForDimension(mc.thePlayer.dimension) : mc.theWorld;
+        BiomeGenBase biome = world.getBiomeGenForCoords(coord.x, coord.z);
+        Chunk chunk = world.getChunkFromBlockCoords(coord.x, coord.z);
         
         /*
          * ********************************************************************************************************************
@@ -471,7 +473,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return world.getBiomeGenForCoords(coord.x, coord.z).biomeName;
+                return biome.biomeName;
             }
             catch(Throwable e)
             {
@@ -488,11 +490,12 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.toLowerCase().startsWith("raining"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.isRaining() && world.getBiomeGenForCoords(coord.x, coord.z).canSpawnLightningBolt()));
+            return parseBoolean(s, Boolean.valueOf(world.isRaining() && biome.canSpawnLightningBolt()));
         }
         if(s.toLowerCase().startsWith("snowing"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.isRaining() && !world.getBiomeGenForCoords(coord.x, coord.z).canSpawnLightningBolt()));
+            return parseBoolean(s, Boolean.valueOf(world.isRaining() && !biome.canSpawnLightningBolt()
+                    && !biome.equals(BiomeGenBase.desert) && !biome.equals(BiomeGenBase.desertHills)));
         }
         if(s.equalsIgnoreCase("nextrain"))
         {
@@ -500,11 +503,10 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.toLowerCase().startsWith("thundering"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.worldInfo.isThundering() && world.getBiomeGenForCoords(coord.x, coord.z).canSpawnLightningBolt()));
+            return parseBoolean(s, Boolean.valueOf(world.worldInfo.isThundering() && biome.canSpawnLightningBolt()));
         }
         if(s.toLowerCase().startsWith("slimes"))
         {
-            Chunk chunk = world.getChunkFromBlockCoords(coord.x, coord.z);
             return parseBoolean(s, Boolean.valueOf(chunk.getRandomWithSeed(987234911L).nextInt(10) == 0));
         }
         if(s.toLowerCase().startsWith("hardcore"))
@@ -515,8 +517,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, coord.y, coord.z & 0xf, 
-                        world.calculateSkylightSubtracted(1.0F)));
+                return Integer.toString(chunk.getBlockLightValue(coord.x & 0xf, coord.y, coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
             }
             catch(Throwable e)
             {
@@ -527,8 +528,8 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getBlockLightValue(coord.x & 0xf, 
-                        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
+                return Integer.toString(chunk.getBlockLightValue(coord.x & 0xf, 
+                		(int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
             }
             catch(Throwable e)
             {
@@ -539,8 +540,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, 
-                        coord.x & 0xf, coord.y, coord.z & 0xf));
+                return Integer.toString(chunk.getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, coord.y, coord.z & 0xf));
             }
             catch(Throwable e)
             {
@@ -551,8 +551,8 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Integer.toString(world.getChunkFromBlockCoords(coord.x, coord.z).getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, 
-                        (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
+                return Integer.toString(chunk.getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, 
+                		(int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
             }
             catch(Throwable e)
             {
@@ -915,7 +915,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if(s.equalsIgnoreCase("texturepack"))
         {
-            return mc.texturePackList.getSelectedTexturePack().func_77536_b();
+            return mc.texturePackList.getSelectedTexturePack().getTexturePackFileName();
         }
         if(s.equalsIgnoreCase("equippedname"))
         {
