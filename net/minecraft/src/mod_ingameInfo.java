@@ -47,7 +47,7 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.2.r01";
+        return "ML 1.4.2.r02";
     }
 
     public mod_ingameInfo()
@@ -91,7 +91,6 @@ public class mod_ingameInfo extends BaseMod
         for(int i = 0; i < o.length; i++)
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
             
-        ModLoader.setInGameHook(this, true, false);
         checkUpdate = allowUpdateCheck;
         versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic, ModLoader.getLogger());
     }
@@ -100,6 +99,7 @@ public class mod_ingameInfo extends BaseMod
     public void load()
     {
         versionChecker.checkVersionWithLogging();
+        ModLoader.setInGameHook(this, true, false);
     }
 
     @Override
