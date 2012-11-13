@@ -7,6 +7,8 @@ import bspkrs.util.ModVersionChecker;
 import java.util.*;
 import java.util.logging.Level;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import net.minecraft.client.Minecraft;
 
@@ -32,10 +34,15 @@ public class mod_ingameInfo extends BaseMod
     public static int[] yOffset;
     @MLProp(info="Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
     public static boolean showInChat = false;
+    private String[] defaultConfig = {"<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>",
+                                      "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>",
+                                      "&fXP: &e<xpthislevel>&f / &e<xpcap>",
+                                      "Time: &b<rltime[h:mma]>"};
+    private String configPath;
     
     private boolean checkUpdate;
     private ModVersionChecker versionChecker;
-    private String versionURL = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.2/ingameInfo.version";
+    private String versionURL = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.4/ingameInfo.version";
     private String mcfTopic = "http://www.minecraftforum.net/topic/1009577-";
 
     @Override
@@ -47,7 +54,7 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.2.r02";
+        return "ML 1.4.4.r01";
     }
 
     public mod_ingameInfo()
@@ -56,8 +63,9 @@ public class mod_ingameInfo extends BaseMod
         rowCount = (new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0});
         xOffset = (new int[] {2, 0, 2, 2, 0, 2, 2, 0, 2});
         yOffset = (new int[] {2, 2, 2, 0, 0, 0, 2, 41, 2});
-        fileName = "ingameInfo";
-        text = loadText(new File(Minecraft.getMinecraftDir(), (new StringBuilder()).append("/config/IngameInfo/").append(fileName).toString()));
+        fileName = "ingameInfo.txt";
+        configPath = "/config/IngameInfo/";
+        text = loadText(new File(mc.getMinecraftDir(), configPath + fileName));
         for(int i = 0; i < text.length; i++)
         {
             if(text[i].toLowerCase().contains("<left>") || text[i].toLowerCase().contains("<topleft>"))
@@ -163,16 +171,23 @@ public class mod_ingameInfo extends BaseMod
 
     private File createFile()
     {
-        File file = new File(Minecraft.getMinecraftDir(), "/mods/daftpvf/");
+        File file = new File(mc.getMinecraftDir(), configPath);
+        
         if(!file.exists())
-        {
             file.mkdir();
-        }
-        File file1 = new File(file, (new StringBuilder()).append(fileName).append(".txt").toString());
+        
+        file = new File(file, fileName);
         try
         {
-            file1.createNewFile();
-            return file1;
+            file.createNewFile();
+            PrintWriter out = new PrintWriter(new FileWriter(file));
+
+            for (String s : defaultConfig)
+                out.println(s);
+
+            out.close();
+            
+            return file;
         }
         catch(Throwable exception)
         {
