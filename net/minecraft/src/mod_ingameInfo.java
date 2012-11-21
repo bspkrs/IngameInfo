@@ -1,50 +1,50 @@
 package net.minecraft.src;
 
-import bspkrs.util.CommonUtils;
-import bspkrs.util.Coord;
-import bspkrs.util.client.HUDUtils;
-import bspkrs.util.ModVersionChecker;
-import java.util.*;
-import java.util.logging.Level;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+import java.util.logging.Level;
+
 import net.minecraft.client.Minecraft;
+import bspkrs.util.CommonUtils;
+import bspkrs.util.Coord;
+import bspkrs.util.ModVersionChecker;
+import bspkrs.util.client.HUDUtils;
 
 public class mod_ingameInfo extends BaseMod
 {
-    private Minecraft mc;
-    private ScaledResolution scaledResolution;
-    private int alignMode;
-    int rowNum[];
-    int rowCount[];
-    String text[];
-    String fileName;
-
-    @MLProp(info="Set to true to allow checking for mod updates, false to disable")
-    public static boolean allowUpdateCheck = true;
-    @MLProp(info="Valid memory unit strings are KB, MB, GB")
-    public static String memoryUnit = "MB";
-    @MLProp(info="Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
-    public static String xOffsets = "2, 0, 2, 2, 0, 2, 2, 0, 2";
-    public static int[] xOffset;
-    @MLProp(info="Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
-    public static String yOffsets = "2, 2, 2, 0, 0, 0, 2, 41, 2";
-    public static int[] yOffset;
-    @MLProp(info="Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
-    public static boolean showInChat = false;
-    private String[] defaultConfig = {"<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>",
-                                      "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>",
-                                      "&fXP: &e<xpthislevel>&f / &e<xpcap>",
-                                      "Time: &b<rltime[h:mma]>"};
-    private String configPath;
+    private final Minecraft         mc;
+    private ScaledResolution        scaledResolution;
+    private int                     alignMode;
+    int                             rowNum[];
+    int                             rowCount[];
+    String                          text[];
+    String                          fileName;
     
-    private boolean checkUpdate;
-    private ModVersionChecker versionChecker;
-    private String versionURL = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.4/ingameInfo.version";
-    private String mcfTopic = "http://www.minecraftforum.net/topic/1009577-";
-
+    @MLProp(info = "Set to true to allow checking for mod updates, false to disable")
+    public static boolean           allowUpdateCheck = true;
+    @MLProp(info = "Valid memory unit strings are KB, MB, GB")
+    public static String            memoryUnit       = "MB";
+    @MLProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
+    public static String            xOffsets         = "2, 0, 2, 2, 0, 2, 2, 0, 2";
+    public static int[]             xOffset;
+    @MLProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
+    public static String            yOffsets         = "2, 2, 2, 0, 0, 0, 2, 41, 2";
+    public static int[]             yOffset;
+    @MLProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
+    public static boolean           showInChat       = false;
+    private final String[]          defaultConfig    = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
+    private final String            configPath;
+    
+    private boolean                 checkUpdate;
+    private final ModVersionChecker versionChecker;
+    private final String            versionURL       = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.5/ingameInfo.version";
+    private final String            mcfTopic         = "http://www.minecraftforum.net/topic/1009577-";
+    
     @Override
     public String getName()
     {
@@ -54,100 +54,98 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.4.r01";
+        return "ML 1.4.5.r01";
     }
-
+    
     public mod_ingameInfo()
     {
         mc = ModLoader.getMinecraftInstance();
-        rowCount = (new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0});
-        xOffset = (new int[] {2, 0, 2, 2, 0, 2, 2, 0, 2});
-        yOffset = (new int[] {2, 2, 2, 0, 0, 0, 2, 41, 2});
+        rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        xOffset = (new int[] { 2, 0, 2, 2, 0, 2, 2, 0, 2 });
+        yOffset = (new int[] { 2, 2, 2, 0, 0, 0, 2, 41, 2 });
         fileName = "ingameInfo.txt";
         configPath = "/config/IngameInfo/";
         text = loadText(new File(mc.getMinecraftDir(), configPath + fileName));
-        for(int i = 0; i < text.length; i++)
+        for (int i = 0; i < text.length; i++)
         {
-            if(text[i].toLowerCase().contains("<left>") || text[i].toLowerCase().contains("<topleft>"))
+            if (text[i].toLowerCase().contains("<left>") || text[i].toLowerCase().contains("<topleft>"))
                 alignMode = 0;
-            else if(text[i].toLowerCase().contains("<center>") || text[i].toLowerCase().contains("<topcenter>"))
+            else if (text[i].toLowerCase().contains("<center>") || text[i].toLowerCase().contains("<topcenter>"))
                 alignMode = 1;
-            else if(text[i].toLowerCase().contains("<right>") || text[i].toLowerCase().contains("<topright>"))
+            else if (text[i].toLowerCase().contains("<right>") || text[i].toLowerCase().contains("<topright>"))
                 alignMode = 2;
-            else if(text[i].toLowerCase().contains("<middleleft>"))
+            else if (text[i].toLowerCase().contains("<middleleft>"))
                 alignMode = 3;
-            else if(text[i].toLowerCase().contains("<middlecenter>"))
+            else if (text[i].toLowerCase().contains("<middlecenter>"))
                 alignMode = 4;
-            else if(text[i].toLowerCase().contains("<middleright>"))
+            else if (text[i].toLowerCase().contains("<middleright>"))
                 alignMode = 5;
-            else if(text[i].toLowerCase().contains("<bottomleft>"))
+            else if (text[i].toLowerCase().contains("<bottomleft>"))
                 alignMode = 6;
-            else if(text[i].toLowerCase().contains("<bottomcenter>"))
+            else if (text[i].toLowerCase().contains("<bottomcenter>"))
                 alignMode = 7;
-            else if(text[i].toLowerCase().contains("<bottomright>"))
+            else if (text[i].toLowerCase().contains("<bottomright>"))
                 alignMode = 8;
             
             rowCount[alignMode]++;
         }
         
         String[] o = xOffsets.split(",");
-        for(int i = 0; i < o.length; i++)
+        for (int i = 0; i < o.length; i++)
             xOffset[i] = CommonUtils.parseInt(o[i].trim());
         
-
         o = yOffsets.split(",");
-        for(int i = 0; i < o.length; i++)
+        for (int i = 0; i < o.length; i++)
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
-            
+        
         checkUpdate = allowUpdateCheck;
         versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic, ModLoader.getLogger());
     }
-
+    
     @Override
     public void load()
     {
         versionChecker.checkVersionWithLogging();
         ModLoader.setInGameHook(this, true, false);
     }
-
+    
     @Override
     public boolean onTickInGame(float f, Minecraft mc)
     {
-        if((mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
+        if ((mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
         {
             scaledResolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-            rowNum = (new int[] {
-                0, 0, 0, 0, 0, 0, 0, 0, 0
-            });
+            rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             String lines[] = text;
             int i = lines.length;
-            for(int j = 0; j < i; j++)
+            for (int j = 0; j < i; j++)
             {
                 String s = lines[j];
                 s = replaceAllTags(s);
-                //if(!(alignMode == 6 && mc.currentScreen != null && mc.currentScreen instanceof GuiChat)) //if chat is open, don't display bottomleft info
-                mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), 
-                        getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
+                // if(!(alignMode == 6 && mc.currentScreen != null &&
+                // mc.currentScreen instanceof GuiChat)) //if chat is open,
+                // don't display bottomleft info
+                mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
                 rowNum[alignMode]++;
             }
-
+            
         }
         
-        if(checkUpdate)
+        if (checkUpdate)
         {
-            if(!versionChecker.isCurrentVersion())
-                for(String msg : versionChecker.getInGameMessage())
+            if (!versionChecker.isCurrentVersion())
+                for (String msg : versionChecker.getInGameMessage())
                     mc.thePlayer.addChatMessage(msg);
             checkUpdate = false;
         }
         return true;
     }
-
+    
     private String[] loadText(File file)
     {
         ArrayList arraylist = new ArrayList();
         Scanner scanner = null;
-        if(!file.exists())
+        if (!file.exists())
         {
             file = createFile();
         }
@@ -155,25 +153,25 @@ public class mod_ingameInfo extends BaseMod
         {
             scanner = new Scanner(file);
         }
-        catch(Throwable e) 
+        catch (Throwable e)
         {
             ModLoader.getLogger().log(Level.WARNING, "Error getting ingameInfo.txt: " + e.getMessage());
             e.printStackTrace();
-            return new String[] {""};
+            return new String[] { "" };
         }
-        while(scanner.hasNextLine())
+        while (scanner.hasNextLine())
         {
             arraylist.add(scanner.nextLine());
         }
         scanner.close();
-        return (String[])arraylist.toArray(new String[arraylist.size()]);
+        return (String[]) arraylist.toArray(new String[arraylist.size()]);
     }
-
+    
     private File createFile()
     {
         File file = new File(mc.getMinecraftDir(), configPath);
         
-        if(!file.exists())
+        if (!file.exists())
             file.mkdir();
         
         file = new File(file, fileName);
@@ -181,74 +179,74 @@ public class mod_ingameInfo extends BaseMod
         {
             file.createNewFile();
             PrintWriter out = new PrintWriter(new FileWriter(file));
-
+            
             for (String s : defaultConfig)
                 out.println(s);
-
+            
             out.close();
             
             return file;
         }
-        catch(Throwable exception)
+        catch (Throwable exception)
         {
             System.err.println("File couldn't be created, aborting mod_ingameInfo!");
         }
         return null;
     }
-
+    
     private int getX(int width)
     {
-        if(alignMode == 1 || alignMode == 4 || alignMode == 7)
+        if (alignMode == 1 || alignMode == 4 || alignMode == 7)
             return scaledResolution.getScaledWidth() / 2 - width / 2 + xOffset[alignMode];
-        else if(alignMode == 2 || alignMode == 5 || alignMode == 8)
+        else if (alignMode == 2 || alignMode == 5 || alignMode == 8)
             return scaledResolution.getScaledWidth() - width - xOffset[alignMode];
         else
             return xOffset[alignMode];
     }
-
+    
     private int getY(int rowCount, int rowNum)
     {
-        if(alignMode == 3 || alignMode == 4 || alignMode == 5)
-            return (scaledResolution.getScaledHeight() / 2) - (rowCount * 10 / 2) + (rowNum*10) + yOffset[alignMode];
-        else if(alignMode == 6 || alignMode == 7 || alignMode == 8)
-            return scaledResolution.getScaledHeight() - (rowCount*10) + (rowNum*10) - yOffset[alignMode];
+        if (alignMode == 3 || alignMode == 4 || alignMode == 5)
+            return (scaledResolution.getScaledHeight() / 2) - (rowCount * 10 / 2) + (rowNum * 10) + yOffset[alignMode];
+        else if (alignMode == 6 || alignMode == 7 || alignMode == 8)
+            return scaledResolution.getScaledHeight() - (rowCount * 10) + (rowNum * 10) - yOffset[alignMode];
         else
-            return (rowNum*10) + yOffset[alignMode];
+            return (rowNum * 10) + yOffset[alignMode];
     }
-
+    
     private String replaceAllTags(String s)
     {
-        for(; s.indexOf('<') != -1; s = replaceTags(s)) { }
+        for (; s.indexOf('<') != -1; s = replaceTags(s))
+        {}
         return s.replaceAll("&", "\247");
     }
-
+    
     private String replaceTags(String s)
     {
         int startIndex = s.indexOf('<');
         int endIndex = s.indexOf('>');
         int openParamIndex = s.indexOf('[', startIndex);
-        if(openParamIndex < endIndex)
+        if (openParamIndex < endIndex)
         {
             endIndex = s.indexOf('>', s.indexOf(']', startIndex));
         }
-        if(startIndex == -1 || endIndex == -1)
+        if (startIndex == -1 || endIndex == -1)
         {
             return s;
-        } else
+        }
+        else
         {
             String s1 = s.substring(startIndex + 1, endIndex);
             s = s.replace((new StringBuilder()).append("<").append(s1).append(">").toString(), getTag(s1));
             return s;
         }
     }
-
+    
     public String getTag(String s)
     {
-        Coord coord = new Coord(MathHelper.floor_double(mc.thePlayer.posX), MathHelper.floor_double(mc.thePlayer.posY), 
-                MathHelper.floor_double(mc.thePlayer.posZ));
+        Coord coord = new Coord(MathHelper.floor_double(mc.thePlayer.posX), MathHelper.floor_double(mc.thePlayer.posY), MathHelper.floor_double(mc.thePlayer.posZ));
         
-        World world = mc.isIntegratedServerRunning() 
-                ? mc.getIntegratedServer().worldServerForDimension(mc.thePlayer.dimension) : mc.theWorld;
+        World world = mc.isIntegratedServerRunning() ? mc.getIntegratedServer().worldServerForDimension(mc.thePlayer.dimension) : mc.theWorld;
         BiomeGenBase biome = world.getBiomeGenForCoords(coord.x, coord.z);
         Chunk chunk = world.getChunkFromBlockCoords(coord.x, coord.z);
         
@@ -257,33 +255,33 @@ public class mod_ingameInfo extends BaseMod
          * Utility tags
          */
         
-        if(s.toLowerCase().startsWith("max"))
+        if (s.toLowerCase().startsWith("max"))
         {
             int startIndex = s.indexOf('[');
             int endIndex = s.indexOf('[', startIndex + 1);
             int divIndex = s.indexOf('/');
-            if(s.indexOf('[') == -1 || endIndex == -1 || endIndex < divIndex)
+            if (s.indexOf('[') == -1 || endIndex == -1 || endIndex < divIndex)
                 return "(ERROR: Incorrect syntax in MAX tag)";
             else
             {
                 try
                 {
-                    float val1 = Float.valueOf(getTag(s.substring(startIndex+1, divIndex).replace("<","").replace(">","")));
-                    float val2 = Float.valueOf(getTag(s.substring(divIndex+1, endIndex).replace("<","").replace(">","")));
+                    float val1 = Float.valueOf(getTag(s.substring(startIndex + 1, divIndex).replace("<", "").replace(">", "")));
+                    float val2 = Float.valueOf(getTag(s.substring(divIndex + 1, endIndex).replace("<", "").replace(">", "")));
                     return parseBoolean(s.substring(endIndex), val1 >= val2);
                 }
                 catch (NumberFormatException e)
                 {
-                    return "(MAX tag: NumberFormatException: '" + s.substring(startIndex+1, divIndex) + "', '" + s.substring(divIndex+1,endIndex) + "')";
+                    return "(MAX tag: NumberFormatException: '" + s.substring(startIndex + 1, divIndex) + "', '" + s.substring(divIndex + 1, endIndex) + "')";
                 }
             }
         }
-        if(s.toLowerCase().startsWith("pct"))
+        if (s.toLowerCase().startsWith("pct"))
         {
             try
             {
-                float value = Float.valueOf(getTag(s.substring(s.indexOf('(') + 1, s.indexOf(',')).replace("<","").replace(">","")));
-                float pct = Float.valueOf(getTag(s.substring(s.indexOf(',') + 1, s.indexOf(')')).replace("<","").replace(">",""))) / 100F;
+                float value = Float.valueOf(getTag(s.substring(s.indexOf('(') + 1, s.indexOf(',')).replace("<", "").replace(">", "")));
+                float pct = Float.valueOf(getTag(s.substring(s.indexOf(',') + 1, s.indexOf(')')).replace("<", "").replace(">", ""))) / 100F;
                 return String.valueOf(MathHelper.floor_double(value * pct));
             }
             catch (NumberFormatException e)
@@ -291,53 +289,53 @@ public class mod_ingameInfo extends BaseMod
                 return "(PCT tag: NumberFormatException: '" + s + "')";
             }
         }
-
+        
         /*
          * ********************************************************************************************************************
          * Alignment tags
          */
         
-        if(s.equalsIgnoreCase("left") || s.equalsIgnoreCase("topleft"))
+        if (s.equalsIgnoreCase("left") || s.equalsIgnoreCase("topleft"))
         {
             alignMode = 0;
             return "";
         }
-        if(s.equalsIgnoreCase("center") || s.equalsIgnoreCase("topcenter"))
+        if (s.equalsIgnoreCase("center") || s.equalsIgnoreCase("topcenter"))
         {
             alignMode = 1;
             return "";
         }
-        if(s.equalsIgnoreCase("right") || s.equalsIgnoreCase("topright"))
+        if (s.equalsIgnoreCase("right") || s.equalsIgnoreCase("topright"))
         {
             alignMode = 2;
             return "";
         }
-        if(s.equalsIgnoreCase("middleleft"))
+        if (s.equalsIgnoreCase("middleleft"))
         {
             alignMode = 3;
             return "";
         }
-        if(s.equalsIgnoreCase("middlecenter"))
+        if (s.equalsIgnoreCase("middlecenter"))
         {
             alignMode = 4;
             return "";
         }
-        if(s.equalsIgnoreCase("middleright"))
+        if (s.equalsIgnoreCase("middleright"))
         {
             alignMode = 5;
             return "";
         }
-        if(s.equalsIgnoreCase("bottomleft"))
+        if (s.equalsIgnoreCase("bottomleft"))
         {
             alignMode = 6;
             return "";
         }
-        if(s.equalsIgnoreCase("bottomcenter"))
+        if (s.equalsIgnoreCase("bottomcenter"))
         {
             alignMode = 7;
             return "";
         }
-        if(s.equalsIgnoreCase("bottomright"))
+        if (s.equalsIgnoreCase("bottomright"))
         {
             alignMode = 8;
             return "";
@@ -347,68 +345,68 @@ public class mod_ingameInfo extends BaseMod
          * ********************************************************************************************************************
          * Color tags
          */
-
-        if(s.equalsIgnoreCase("black"))
+        
+        if (s.equalsIgnoreCase("black"))
         {
             return "\2470";
         }
-        if(s.equalsIgnoreCase("darkblue") || s.equalsIgnoreCase("navy"))
+        if (s.equalsIgnoreCase("darkblue") || s.equalsIgnoreCase("navy"))
         {
             return "\2471";
         }
-        if(s.equalsIgnoreCase("darkgreen") || s.equalsIgnoreCase("green"))
+        if (s.equalsIgnoreCase("darkgreen") || s.equalsIgnoreCase("green"))
         {
             return "\2472";
         }
-        if(s.equalsIgnoreCase("darkaqua") || s.equalsIgnoreCase("darkcyan") || s.equalsIgnoreCase("turquoise"))
+        if (s.equalsIgnoreCase("darkaqua") || s.equalsIgnoreCase("darkcyan") || s.equalsIgnoreCase("turquoise"))
         {
             return "\2473";
         }
-        if(s.equalsIgnoreCase("darkred"))
+        if (s.equalsIgnoreCase("darkred"))
         {
             return "\2474";
         }
-        if(s.equalsIgnoreCase("purple") || s.equalsIgnoreCase("violet"))
+        if (s.equalsIgnoreCase("purple") || s.equalsIgnoreCase("violet"))
         {
             return "\2475";
         }
-        if(s.equalsIgnoreCase("orange") || s.equalsIgnoreCase("gold"))
+        if (s.equalsIgnoreCase("orange") || s.equalsIgnoreCase("gold"))
         {
             return "\2476";
         }
-        if(s.equalsIgnoreCase("lightgrey") || s.equalsIgnoreCase("lightgray") || s.equalsIgnoreCase("grey") || s.equalsIgnoreCase("gray"))
+        if (s.equalsIgnoreCase("lightgrey") || s.equalsIgnoreCase("lightgray") || s.equalsIgnoreCase("grey") || s.equalsIgnoreCase("gray"))
         {
             return "\2477";
         }
-        if(s.equalsIgnoreCase("darkgrey") || s.equalsIgnoreCase("darkgray") || s.equalsIgnoreCase("charcoal"))
+        if (s.equalsIgnoreCase("darkgrey") || s.equalsIgnoreCase("darkgray") || s.equalsIgnoreCase("charcoal"))
         {
             return "\2478";
         }
-        if(s.equalsIgnoreCase("indigo") || s.equalsIgnoreCase("blue") || s.equalsIgnoreCase("lightblue"))
+        if (s.equalsIgnoreCase("indigo") || s.equalsIgnoreCase("blue") || s.equalsIgnoreCase("lightblue"))
         {
             return "\2479";
         }
-        if(s.equalsIgnoreCase("brightgreen") || s.equalsIgnoreCase("lightgreen") || s.equalsIgnoreCase("lime"))
+        if (s.equalsIgnoreCase("brightgreen") || s.equalsIgnoreCase("lightgreen") || s.equalsIgnoreCase("lime"))
         {
             return "\247a";
         }
-        if(s.equalsIgnoreCase("aqua") || s.equalsIgnoreCase("lightcyan") || s.equalsIgnoreCase("celeste") || s.equalsIgnoreCase("diamond"))
+        if (s.equalsIgnoreCase("aqua") || s.equalsIgnoreCase("lightcyan") || s.equalsIgnoreCase("celeste") || s.equalsIgnoreCase("diamond"))
         {
             return "\247b";
         }
-        if(s.equalsIgnoreCase("red") || s.equalsIgnoreCase("lightred") || s.equalsIgnoreCase("salmon"))
+        if (s.equalsIgnoreCase("red") || s.equalsIgnoreCase("lightred") || s.equalsIgnoreCase("salmon"))
         {
             return "\247c";
         }
-        if(s.equalsIgnoreCase("pink") || s.equalsIgnoreCase("magenta"))
+        if (s.equalsIgnoreCase("pink") || s.equalsIgnoreCase("magenta"))
         {
             return "\247d";
         }
-        if(s.equalsIgnoreCase("yellow"))
+        if (s.equalsIgnoreCase("yellow"))
         {
             return "\247e";
         }
-        if(s.equalsIgnoreCase("white"))
+        if (s.equalsIgnoreCase("white"))
         {
             return "\247f";
         }
@@ -417,28 +415,28 @@ public class mod_ingameInfo extends BaseMod
          * ********************************************************************************************************************
          * Formatting tags
          */
-
-        if(s.equalsIgnoreCase("random"))
+        
+        if (s.equalsIgnoreCase("random"))
         {
             return "\247k";
         }
-        if(s.equalsIgnoreCase("bold") || s.equalsIgnoreCase("b"))
+        if (s.equalsIgnoreCase("bold") || s.equalsIgnoreCase("b"))
         {
             return "\247l";
         }
-        if(s.equalsIgnoreCase("strikethrough") || s.equalsIgnoreCase("strike") || s.equalsIgnoreCase("s"))
+        if (s.equalsIgnoreCase("strikethrough") || s.equalsIgnoreCase("strike") || s.equalsIgnoreCase("s"))
         {
             return "\247m";
         }
-        if(s.equalsIgnoreCase("underline") || s.equalsIgnoreCase("u"))
+        if (s.equalsIgnoreCase("underline") || s.equalsIgnoreCase("u"))
         {
             return "\247n";
         }
-        if(s.equalsIgnoreCase("italic") || s.equalsIgnoreCase("italics") || s.equalsIgnoreCase("i"))
+        if (s.equalsIgnoreCase("italic") || s.equalsIgnoreCase("italics") || s.equalsIgnoreCase("i"))
         {
             return "\247o";
         }
-        if(s.equalsIgnoreCase("reset") || s.equalsIgnoreCase("r"))
+        if (s.equalsIgnoreCase("reset") || s.equalsIgnoreCase("r"))
         {
             return "\247r";
         }
@@ -448,308 +446,346 @@ public class mod_ingameInfo extends BaseMod
          * World tags
          */
         
-        if(s.toLowerCase().startsWith("irltime") || s.toLowerCase().startsWith("rltime"))
+        if (s.toLowerCase().startsWith("irltime") || s.toLowerCase().startsWith("rltime"))
         {
             int startIndex = s.indexOf('[');
             int endIndex = s.indexOf(']', startIndex + 1);
             String fmt = "";
             
-            if(startIndex != -1 && endIndex != -1)
+            if (startIndex != -1 && endIndex != -1)
                 fmt = s.substring(startIndex + 1, endIndex);
             
-            if(fmt.equals(""))
+            if (fmt.equals(""))
                 fmt = "hh:mma";
             
             return new SimpleDateFormat(fmt).format(new Date());
         }
-        if(s.toLowerCase().startsWith("mctime"))
+        if (s.toLowerCase().startsWith("mctime"))
         {
             int startIndex = s.indexOf('[');
             int endIndex = s.indexOf(']', startIndex + 1);
             long fmt = 12L;
             
-            if(startIndex != -1 && endIndex != -1 && s.substring(startIndex + 1, endIndex).equals("24"))
+            if (startIndex != -1 && endIndex != -1 && s.substring(startIndex + 1, endIndex).equals("24"))
                 fmt = 24L;
             
             return CommonUtils.getMCTimeString(mc.theWorld.getWorldTime(), fmt);
         }
-        if(s.equalsIgnoreCase("day"))
+        if (s.equalsIgnoreCase("day"))
         {
             try
             {
-                return Integer.toString((int)world.worldInfo.getWorldTime() / 24000);
+                return Integer.toString((int) world.worldInfo.getWorldTime() / 24000);
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("biome"))
+        if (s.equalsIgnoreCase("biome"))
         {
             try
             {
                 return biome.biomeName;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("dimension"))
+        if (s.equalsIgnoreCase("dimension"))
         {
             return mc.thePlayer.dimension == -1 ? "Nether" : mc.thePlayer.dimension == 1 ? "The End" : "Overworld";
         }
-        if(s.toLowerCase().startsWith("daytime"))
+        if (s.toLowerCase().startsWith("daytime"))
         {
             return parseBoolean(s, Boolean.valueOf(world.calculateSkylightSubtracted(1.0F) < 4));
         }
-        if(s.toLowerCase().startsWith("raining"))
+        if (s.toLowerCase().startsWith("raining"))
         {
             return parseBoolean(s, Boolean.valueOf(world.isRaining() && biome.canSpawnLightningBolt()));
         }
-        if(s.toLowerCase().startsWith("snowing"))
+        if (s.toLowerCase().startsWith("snowing"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.isRaining() && !biome.canSpawnLightningBolt()
-                    && !biome.equals(BiomeGenBase.desert) && !biome.equals(BiomeGenBase.desertHills)));
+            return parseBoolean(s, Boolean.valueOf(world.isRaining() && !biome.canSpawnLightningBolt() && !biome.equals(BiomeGenBase.desert) && !biome.equals(BiomeGenBase.desertHills)));
         }
-        if(s.equalsIgnoreCase("nextrain"))
+        if (s.equalsIgnoreCase("nextrain"))
         {
             return CommonUtils.ticksToTimeString(world.worldInfo.getRainTime());
         }
-        if(s.toLowerCase().startsWith("thundering"))
+        if (s.toLowerCase().startsWith("thundering"))
         {
             return parseBoolean(s, Boolean.valueOf(world.worldInfo.isThundering() && biome.canSpawnLightningBolt()));
         }
-        if(s.toLowerCase().startsWith("slimes"))
+        if (s.toLowerCase().startsWith("slimes"))
         {
             return parseBoolean(s, Boolean.valueOf(chunk.getRandomWithSeed(987234911L).nextInt(10) == 0));
         }
-        if(s.toLowerCase().startsWith("hardcore"))
+        if (s.toLowerCase().startsWith("hardcore"))
         {
             return parseBoolean(s, Boolean.valueOf(world.worldInfo.isHardcoreModeEnabled()));
         }
-        if(s.equalsIgnoreCase("light"))
+        if (s.equalsIgnoreCase("light"))
         {
             try
             {
                 return Integer.toString(chunk.getBlockLightValue(coord.x & 0xf, coord.y, coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("lightfeet"))
+        if (s.equalsIgnoreCase("lightfeet"))
         {
             try
             {
-                return Integer.toString(chunk.getBlockLightValue(coord.x & 0xf, 
-                		(int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
+                return Integer.toString(chunk.getBlockLightValue(coord.x & 0xf, (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf, world.calculateSkylightSubtracted(1.0F)));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("lightnosun"))
+        if (s.equalsIgnoreCase("lightnosun"))
         {
             try
             {
                 return Integer.toString(chunk.getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, coord.y, coord.z & 0xf));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("lightnosunfeet"))
+        if (s.equalsIgnoreCase("lightnosunfeet"))
         {
             try
             {
-                return Integer.toString(chunk.getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, 
-                		(int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
+                return Integer.toString(chunk.getSavedLightValue(EnumSkyBlock.Block, coord.x & 0xf, (int) Math.round(mc.thePlayer.boundingBox.minY), coord.z & 0xf));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("x") || s.equalsIgnoreCase("xi"))
+        if (s.equalsIgnoreCase("x") || s.equalsIgnoreCase("xi"))
         {
             return Integer.toString(coord.x);
         }
-        if(s.equalsIgnoreCase("y") || s.equalsIgnoreCase("yi"))
+        if (s.equalsIgnoreCase("y") || s.equalsIgnoreCase("yi"))
         {
             return Integer.toString(coord.y);
         }
-        if(s.equalsIgnoreCase("yfeet") || s.equalsIgnoreCase("yfeeti"))
+        if (s.equalsIgnoreCase("yfeet") || s.equalsIgnoreCase("yfeeti"))
         {
             return Integer.toString((int) Math.round(mc.thePlayer.boundingBox.minY));
         }
-        if(s.equalsIgnoreCase("z") || s.equalsIgnoreCase("zi"))
+        if (s.equalsIgnoreCase("z") || s.equalsIgnoreCase("zi"))
         {
             return Integer.toString(coord.z);
         }
-        if (s.equalsIgnoreCase("decx")) 
+        if (s.equalsIgnoreCase("decx"))
         {
             return Double.toString(Math.round(mc.thePlayer.posX * 10.0) / 10.0);
         }
-        if (s.equalsIgnoreCase("decy")) 
+        if (s.equalsIgnoreCase("decy"))
         {
             return Double.toString(Math.round(mc.thePlayer.posY * 10.0) / 10.0);
         }
-        if (s.equalsIgnoreCase("decyfeet")) 
+        if (s.equalsIgnoreCase("decyfeet"))
         {
             return Double.toString(Math.round(mc.thePlayer.boundingBox.minY * 10.0) / 10.0);
         }
-        if (s.equalsIgnoreCase("decz")) 
+        if (s.equalsIgnoreCase("decz"))
         {
             return Double.toString(Math.round(mc.thePlayer.posZ * 10.0) / 10.0);
         }
-        if(s.equalsIgnoreCase("worldname"))
+        if (s.equalsIgnoreCase("worldname"))
         {
             try
             {
                 return world.worldInfo.getWorldName();
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("worldsize"))
+        if (s.equalsIgnoreCase("worldsize"))
         {
             try
             {
                 return Long.toString(world.worldInfo.getSizeOnDisk());
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("worldsizemb"))
+        if (s.equalsIgnoreCase("worldsizemb"))
         {
             try
             {
-                return Float.toString((float)(((world.worldInfo.getSizeOnDisk() / 1024L) * 100L) / 1024L) / 100F);
+                return Float.toString((((world.worldInfo.getSizeOnDisk() / 1024L) * 100L) / 1024L) / 100F);
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("seed"))
+        if (s.equalsIgnoreCase("seed"))
         {
             try
             {
                 return mc.isIntegratedServerRunning() ? Long.toString(world.getSeed()) : "&onull";
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("roughdirection"))
+        if (s.equalsIgnoreCase("roughdirection"))
         {
             try
             {
-                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
+                switch (MathHelper.floor_double(((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
                 {
-                case 0:    return "South";
-                case 1: return "West";
-                case 2: return "North";
-                case 3: return "East";
+                    case 0:
+                        return "South";
+                    case 1:
+                        return "West";
+                    case 2:
+                        return "North";
+                    case 3:
+                        return "East";
                 }
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("finedirection"))
+        if (s.equalsIgnoreCase("finedirection"))
         {
             try
             {
-                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
+                switch (MathHelper.floor_double(((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
                 {
-                case 0:    return "South";
-                case 1: return "South West";
-                case 2: return "West";
-                case 3: return "North West";
-                case 4: return "North";
-                case 5: return "North East";
-                case 6: return "East";
-                case 7: return "South East";
+                    case 0:
+                        return "South";
+                    case 1:
+                        return "South West";
+                    case 2:
+                        return "West";
+                    case 3:
+                        return "North West";
+                    case 4:
+                        return "North";
+                    case 5:
+                        return "North East";
+                    case 6:
+                        return "East";
+                    case 7:
+                        return "South East";
                 }
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("abrroughdirection"))
+        if (s.equalsIgnoreCase("abrroughdirection"))
         {
             try
             {
-                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
+                switch (MathHelper.floor_double(((mc.thePlayer.rotationYaw * 4F) / 360F) + 0.5D) & 3)
                 {
-                case 0:    return "S";
-                case 1: return "W";
-                case 2: return "N";
-                case 3: return "E";
+                    case 0:
+                        return "S";
+                    case 1:
+                        return "W";
+                    case 2:
+                        return "N";
+                    case 3:
+                        return "E";
                 }
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("abrfinedirection"))
+        if (s.equalsIgnoreCase("abrfinedirection"))
         {
             try
             {
-                switch(MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
+                switch (MathHelper.floor_double(((mc.thePlayer.rotationYaw * 8F) / 360F) + 0.5D) & 7)
                 {
-                case 0:    return "S";
-                case 1: return "SW";
-                case 2: return "W";
-                case 3: return "NW";
-                case 4: return "N";
-                case 5: return "NE";
-                case 6: return "E";
-                case 7: return "SE";
+                    case 0:
+                        return "S";
+                    case 1:
+                        return "SW";
+                    case 2:
+                        return "W";
+                    case 3:
+                        return "NW";
+                    case 4:
+                        return "N";
+                    case 5:
+                        return "NE";
+                    case 6:
+                        return "E";
+                    case 7:
+                        return "SE";
                 }
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("directionhud"))
+        if (s.equalsIgnoreCase("directionhud"))
         {
             try
             {
-                int direction = MathHelper.floor_double((double)((mc.thePlayer.rotationYaw * 16F) / 360F) + 0.5D) & 15;
-                if(direction == 0)  return "SE   &cS &f  SW";
-                if(direction == 1)  return "  S    SW  ";
-                if(direction == 2)  return "S    &cSW&f    W";
-                if(direction == 3)  return "  SW    W  ";
-                if(direction == 4)  return "SW   &cW &f  NW";
-                if(direction == 5)  return "  W    NW  ";
-                if(direction == 6)  return "W    &cNW&f    N";
-                if(direction == 7)  return "  NW    N  ";
-                if(direction == 8)  return "NW   &cN &f  NE";
-                if(direction == 9)  return "  N    NE  ";
-                if(direction == 10) return "N    &cNE&f    E";
-                if(direction == 11) return "  NE    E  ";
-                if(direction == 12) return "NE   &cE &f  SE";
-                if(direction == 13) return "  E    SE  ";
-                if(direction == 14) return "E    &cSE&f    S";
-                if(direction == 15) return "  SE    S  ";
-                else return "this shit isn't working";
+                int direction = MathHelper.floor_double(((mc.thePlayer.rotationYaw * 16F) / 360F) + 0.5D) & 15;
+                if (direction == 0)
+                    return "SE   &cS &f  SW";
+                if (direction == 1)
+                    return "  S    SW  ";
+                if (direction == 2)
+                    return "S    &cSW&f    W";
+                if (direction == 3)
+                    return "  SW    W  ";
+                if (direction == 4)
+                    return "SW   &cW &f  NW";
+                if (direction == 5)
+                    return "  W    NW  ";
+                if (direction == 6)
+                    return "W    &cNW&f    N";
+                if (direction == 7)
+                    return "  NW    N  ";
+                if (direction == 8)
+                    return "NW   &cN &f  NE";
+                if (direction == 9)
+                    return "  N    NE  ";
+                if (direction == 10)
+                    return "N    &cNE&f    E";
+                if (direction == 11)
+                    return "  NE    E  ";
+                if (direction == 12)
+                    return "NE   &cE &f  SE";
+                if (direction == 13)
+                    return "  E    SE  ";
+                if (direction == 14)
+                    return "E    &cSE&f    S";
+                if (direction == 15)
+                    return "  SE    S  ";
+                else
+                    return "this shit isn't working";
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
@@ -760,101 +796,101 @@ public class mod_ingameInfo extends BaseMod
          * Debug tags
          */
         
-        if(s.equalsIgnoreCase("fps"))
+        if (s.equalsIgnoreCase("fps"))
         {
             try
             {
                 return mc.debug.substring(0, mc.debug.indexOf(" fps"));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if (s.equalsIgnoreCase("entitiesrendered")) 
+        if (s.equalsIgnoreCase("entitiesrendered"))
         {
             try
             {
                 String str = mc.getEntityDebug();
                 return str.substring(str.indexOf(' ') + 1, str.indexOf('/'));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if (s.equalsIgnoreCase("entitiestotal")) 
+        if (s.equalsIgnoreCase("entitiestotal"))
         {
             try
             {
                 String str = mc.getEntityDebug();
                 return str.substring(str.indexOf('/') + 1, str.indexOf('.'));
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if (s.equalsIgnoreCase("memtotal")) 
+        if (s.equalsIgnoreCase("memtotal"))
         {
             try
             {
-                if(memoryUnit.equalsIgnoreCase("KB"))
+                if (memoryUnit.equalsIgnoreCase("KB"))
                     return Long.toString(Runtime.getRuntime().totalMemory() / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("MB"))
+                if (memoryUnit.equalsIgnoreCase("MB"))
                     return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("GB"))
+                if (memoryUnit.equalsIgnoreCase("GB"))
                     return Long.toString(Runtime.getRuntime().totalMemory() / 1024L / 1024L / 1024L) + memoryUnit;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if (s.equalsIgnoreCase("memmax")) 
+        if (s.equalsIgnoreCase("memmax"))
         {
             try
             {
-                if(memoryUnit.equalsIgnoreCase("KB"))
+                if (memoryUnit.equalsIgnoreCase("KB"))
                     return Long.toString(Runtime.getRuntime().maxMemory() / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("MB"))
+                if (memoryUnit.equalsIgnoreCase("MB"))
                     return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("GB"))
+                if (memoryUnit.equalsIgnoreCase("GB"))
                     return Long.toString(Runtime.getRuntime().maxMemory() / 1024L / 1024L / 1024L) + memoryUnit;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if (s.equalsIgnoreCase("memfree")) 
+        if (s.equalsIgnoreCase("memfree"))
         {
             try
             {
-                if(memoryUnit.equalsIgnoreCase("KB"))
+                if (memoryUnit.equalsIgnoreCase("KB"))
                     return Long.toString(Runtime.getRuntime().freeMemory() / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("MB"))
+                if (memoryUnit.equalsIgnoreCase("MB"))
                     return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("GB"))
+                if (memoryUnit.equalsIgnoreCase("GB"))
                     return Long.toString(Runtime.getRuntime().freeMemory() / 1024L / 1024L / 1024L) + memoryUnit;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if (s.equalsIgnoreCase("memused")) 
+        if (s.equalsIgnoreCase("memused"))
         {
             try
             {
-                if(memoryUnit.equalsIgnoreCase("KB"))
+                if (memoryUnit.equalsIgnoreCase("KB"))
                     return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("MB"))
+                if (memoryUnit.equalsIgnoreCase("MB"))
                     return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L) + memoryUnit;
-                if(memoryUnit.equalsIgnoreCase("GB"))
+                if (memoryUnit.equalsIgnoreCase("GB"))
                     return Long.toString((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024L / 1024L / 1024L) + memoryUnit;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
@@ -865,174 +901,152 @@ public class mod_ingameInfo extends BaseMod
          * Player tags
          */
         
-        if(s.equalsIgnoreCase("gamemode"))
+        if (s.equalsIgnoreCase("gamemode"))
         {
             try
             {
-                if(mc.thePlayer.capabilities.isCreativeMode) 
+                if (mc.thePlayer.capabilities.isCreativeMode)
                     return "Creative";
+                else if (world.worldInfo.getGameType().equals(EnumGameType.SURVIVAL))
+                    return "Survival";
+                else if (world.worldInfo.getGameType().equals(EnumGameType.CREATIVE))
+                    return "Creative/Survival?";
+                else if (world.worldInfo.getGameType().equals(EnumGameType.ADVENTURE))
+                    return "Adventure";
                 else
-                    if(world.worldInfo.getGameType().equals(EnumGameType.SURVIVAL))
-                        return "Survival";
-                    else if(world.worldInfo.getGameType().equals(EnumGameType.CREATIVE))
-                        return "Creative/Survival?";
-                    else if(world.worldInfo.getGameType().equals(EnumGameType.ADVENTURE))
-                        return "Adventure";
-                    else
-                        return "???";
+                    return "???";
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "&onull";
             }
         }
-        if(s.equalsIgnoreCase("score"))
+        if (s.equalsIgnoreCase("score"))
         {
             try
             {
                 return Integer.toString(mc.thePlayer.getScore());
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "0";
             }
         }
-        if(s.equalsIgnoreCase("difficulty"))
+        if (s.equalsIgnoreCase("difficulty"))
         {
-            if(mc.gameSettings.difficulty == 0)
+            if (mc.gameSettings.difficulty == 0)
                 return "Peaceful";
-            else if(mc.gameSettings.difficulty == 1)
+            else if (mc.gameSettings.difficulty == 1)
                 return "Easy";
-            else if(mc.gameSettings.difficulty == 2)
+            else if (mc.gameSettings.difficulty == 2)
                 return "Normal";
-            else if(mc.gameSettings.difficulty == 3)
+            else if (mc.gameSettings.difficulty == 3)
                 return "Hard";
         }
-        if(s.equalsIgnoreCase("playerlevel"))
+        if (s.equalsIgnoreCase("playerlevel"))
         {
             return Integer.toString(mc.thePlayer.experienceLevel);
         }
-        if(s.equalsIgnoreCase("xpthislevel"))
+        if (s.equalsIgnoreCase("xpthislevel"))
         {
-            return Integer.toString((int)Math.ceil(mc.thePlayer.experience * (float)mc.thePlayer.xpBarCap()));
+            return Integer.toString((int) Math.ceil(mc.thePlayer.experience * mc.thePlayer.xpBarCap()));
         }
-        if(s.equalsIgnoreCase("xpuntilnext"))
+        if (s.equalsIgnoreCase("xpuntilnext"))
         {
-            return Integer.toString((int)((1.0F - mc.thePlayer.experience) * (float)mc.thePlayer.xpBarCap()));
+            return Integer.toString((int) ((1.0F - mc.thePlayer.experience) * mc.thePlayer.xpBarCap()));
         }
-        if(s.equalsIgnoreCase("xpcap"))
+        if (s.equalsIgnoreCase("xpcap"))
         {
             return Integer.toString(mc.thePlayer.xpBarCap());
         }
-        if(s.equalsIgnoreCase("username"))
+        if (s.equalsIgnoreCase("username"))
         {
             return mc.thePlayer.username;
         }
-        if(s.equalsIgnoreCase("texturepack"))
+        if (s.equalsIgnoreCase("texturepack"))
         {
             return mc.texturePackList.getSelectedTexturePack().getTexturePackFileName();
         }
-        if(s.equalsIgnoreCase("equippedname"))
+        if (s.equalsIgnoreCase("equippedname"))
         {
-            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.shiftedIndex 
-                    ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.shiftedIndex) + ")" : "";
-            return mc.thePlayer.getCurrentEquippedItem() != null 
-                    ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getItemName()) + arrows : "";
+            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.shiftedIndex ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.shiftedIndex) + ")" : "";
+            return mc.thePlayer.getCurrentEquippedItem() != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getItemName()) + arrows : "";
         }
-        if(s.equalsIgnoreCase("equippeddamage"))
+        if (s.equalsIgnoreCase("equippeddamage"))
         {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getItemDamage()) : "0";
+            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getItemDamage()) : "0";
         }
-        if(s.equalsIgnoreCase("equippeddamageleft"))
+        if (s.equalsIgnoreCase("equippeddamageleft"))
         {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() 
-                    ? String.valueOf((mc.thePlayer.getCurrentEquippedItem().getMaxDamage()+1) - (mc.thePlayer.getCurrentEquippedItem().getItemDamage())) : "0";
+            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf((mc.thePlayer.getCurrentEquippedItem().getMaxDamage() + 1) - (mc.thePlayer.getCurrentEquippedItem().getItemDamage())) : "0";
         }
-        if(s.equalsIgnoreCase("equippedmaxdamage"))
+        if (s.equalsIgnoreCase("equippedmaxdamage"))
         {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getMaxDamage()+1) : "0";
+            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getMaxDamage() + 1) : "0";
         }
-        if(s.equalsIgnoreCase("helmetname"))
+        if (s.equalsIgnoreCase("helmetname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null 
-                    ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getItemName()) : "";
         }
-        if(s.equalsIgnoreCase("helmetdamage"))
+        if (s.equalsIgnoreCase("helmetdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage()) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage()) : "0";
         }
-        if(s.equalsIgnoreCase("helmetdamageleft"))
+        if (s.equalsIgnoreCase("helmetdamageleft"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() 
-                    ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage()+1) - (mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage())) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage())) : "0";
         }
-        if(s.equalsIgnoreCase("helmetmaxdamage"))
+        if (s.equalsIgnoreCase("helmetmaxdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage()+1) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage() + 1) : "0";
         }
-        if(s.equalsIgnoreCase("chestplatename"))
+        if (s.equalsIgnoreCase("chestplatename"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null 
-                    ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getItemName()) : "";
         }
-        if(s.equalsIgnoreCase("chestplatedamage"))
+        if (s.equalsIgnoreCase("chestplatedamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage()) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage()) : "0";
         }
-        if(s.equalsIgnoreCase("chestplatedamageleft"))
+        if (s.equalsIgnoreCase("chestplatedamageleft"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() 
-                    ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage()+1) - (mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage())) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage())) : "0";
         }
-        if(s.equalsIgnoreCase("chestplatemaxdamage"))
+        if (s.equalsIgnoreCase("chestplatemaxdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage()+1) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage() + 1) : "0";
         }
-        if(s.equalsIgnoreCase("leggingsname"))
+        if (s.equalsIgnoreCase("leggingsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null 
-                    ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getItemName()) : "";
         }
-        if(s.equalsIgnoreCase("leggingsdamage"))
+        if (s.equalsIgnoreCase("leggingsdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage()) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage()) : "0";
         }
-        if(s.equalsIgnoreCase("leggingsdamageleft"))
+        if (s.equalsIgnoreCase("leggingsdamageleft"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() 
-                    ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage()+1) - (mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage())) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage())) : "0";
         }
-        if(s.equalsIgnoreCase("leggingsmaxdamage"))
+        if (s.equalsIgnoreCase("leggingsmaxdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage()+1) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage() + 1) : "0";
         }
-        if(s.equalsIgnoreCase("bootsname"))
+        if (s.equalsIgnoreCase("bootsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null 
-                    ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getItemName()) : "";
         }
-        if(s.equalsIgnoreCase("bootsdamage"))
+        if (s.equalsIgnoreCase("bootsdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage()) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage()) : "0";
         }
-        if(s.equalsIgnoreCase("bootsdamageleft"))
+        if (s.equalsIgnoreCase("bootsdamageleft"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() 
-                    ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage()+1) - (mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage())) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage())) : "0";
         }
-        if(s.equalsIgnoreCase("bootsmaxdamage"))
+        if (s.equalsIgnoreCase("bootsmaxdamage"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() 
-                    ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage()+1) : "0";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage() + 1) : "0";
         }
         else
         {
@@ -1041,24 +1055,25 @@ public class mod_ingameInfo extends BaseMod
                 Float.valueOf(s);
                 return s;
             }
-            catch(Throwable e)
+            catch (Throwable e)
             {
                 return "";
             }
         }
     }
-
+    
     private String parseBoolean(String s, Boolean boolean1)
     {
         String s1 = "";
-        if(s.indexOf('[') == -1 || s.indexOf('/') == -1 || s.indexOf(']') == -1)
+        if (s.indexOf('[') == -1 || s.indexOf('/') == -1 || s.indexOf(']') == -1)
         {
             return s1;
         }
-        if(boolean1.booleanValue())
+        if (boolean1.booleanValue())
         {
             s1 = s.substring(s.indexOf('[') + 1, s.indexOf('/'));
-        } else
+        }
+        else
         {
             s1 = s.substring(s.indexOf('/') + 1, s.indexOf(']'));
         }
