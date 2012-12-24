@@ -10,6 +10,16 @@ import java.util.Scanner;
 import java.util.logging.Level;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.item.Item;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.StringTranslate;
+import net.minecraft.world.EnumGameType;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.Chunk;
 import bspkrs.util.CommonUtils;
 import bspkrs.util.Coord;
 import bspkrs.util.ModVersionChecker;
@@ -17,33 +27,32 @@ import bspkrs.util.client.HUDUtils;
 
 public class mod_ingameInfo extends BaseMod
 {
-    private final Minecraft         mc;
-    private ScaledResolution        scaledResolution;
-    private int                     alignMode;
-    int                             rowNum[];
-    int                             rowCount[];
-    String                          text[];
-    String                          fileName;
+    private final Minecraft   mc;
+    private ScaledResolution  scaledResolution;
+    private int               alignMode;
+    int                       rowNum[];
+    int                       rowCount[];
+    String                    text[];
+    String                    fileName;
     
     @MLProp(info = "Set to true to allow checking for mod updates, false to disable")
-    public static boolean           allowUpdateCheck = true;
+    public static boolean     allowUpdateCheck = true;
     @MLProp(info = "Valid memory unit strings are KB, MB, GB")
-    public static String            memoryUnit       = "MB";
+    public static String      memoryUnit       = "MB";
     @MLProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
-    public static String            xOffsets         = "2, 0, 2, 2, 0, 2, 2, 0, 2";
-    public static int[]             xOffset;
+    public static String      xOffsets         = "2, 0, 2, 2, 0, 2, 2, 0, 2";
+    public static int[]       xOffset;
     @MLProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
-    public static String            yOffsets         = "2, 2, 2, 0, 0, 0, 2, 41, 2";
-    public static int[]             yOffset;
+    public static String      yOffsets         = "2, 2, 2, 0, 0, 0, 2, 41, 2";
+    public static int[]       yOffset;
     @MLProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
-    public static boolean           showInChat       = false;
-    private final String[]          defaultConfig    = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
-    private final String            configPath;
+    public static boolean     showInChat       = false;
+    private final String[]    defaultConfig    = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
+    private final String      configPath;
     
-    private boolean                 checkUpdate;
-    private final ModVersionChecker versionChecker;
-    private final String            versionURL       = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.5/ingameInfo.version";
-    private final String            mcfTopic         = "http://www.minecraftforum.net/topic/1009577-";
+    private ModVersionChecker versionChecker;
+    private final String      versionURL       = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.6/ingameInfo.version";
+    private final String      mcfTopic         = "http://www.minecraftforum.net/topic/1009577-";
     
     @Override
     public String getName()
@@ -54,7 +63,7 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.5.r01";
+        return "ML 1.4.6.r01";
     }
     
     public mod_ingameInfo()
@@ -98,14 +107,16 @@ public class mod_ingameInfo extends BaseMod
         for (int i = 0; i < o.length; i++)
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
         
-        checkUpdate = allowUpdateCheck;
-        versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic, ModLoader.getLogger());
+        if (allowUpdateCheck)
+            versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic, ModLoader.getLogger());
     }
     
     @Override
     public void load()
     {
-        versionChecker.checkVersionWithLogging();
+        if (allowUpdateCheck)
+            versionChecker.checkVersionWithLogging();
+        
         ModLoader.setInGameHook(this, true, false);
     }
     
@@ -131,12 +142,12 @@ public class mod_ingameInfo extends BaseMod
             
         }
         
-        if (checkUpdate)
+        if (allowUpdateCheck)
         {
             if (!versionChecker.isCurrentVersion())
                 for (String msg : versionChecker.getInGameMessage())
                     mc.thePlayer.addChatMessage(msg);
-            checkUpdate = false;
+            allowUpdateCheck = false;
         }
         return true;
     }
@@ -475,7 +486,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Integer.toString((int) world.worldInfo.getWorldTime() / 24000);
+                return Integer.toString((int) world.getWorldInfo().getWorldTime() / 24000);
             }
             catch (Throwable e)
             {
@@ -511,11 +522,11 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("nextrain"))
         {
-            return CommonUtils.ticksToTimeString(world.worldInfo.getRainTime());
+            return CommonUtils.ticksToTimeString(world.getWorldInfo().getRainTime());
         }
         if (s.toLowerCase().startsWith("thundering"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.worldInfo.isThundering() && biome.canSpawnLightningBolt()));
+            return parseBoolean(s, Boolean.valueOf(world.getWorldInfo().isThundering() && biome.canSpawnLightningBolt()));
         }
         if (s.toLowerCase().startsWith("slimes"))
         {
@@ -523,7 +534,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.toLowerCase().startsWith("hardcore"))
         {
-            return parseBoolean(s, Boolean.valueOf(world.worldInfo.isHardcoreModeEnabled()));
+            return parseBoolean(s, Boolean.valueOf(world.getWorldInfo().isHardcoreModeEnabled()));
         }
         if (s.equalsIgnoreCase("light"))
         {
@@ -605,7 +616,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return world.worldInfo.getWorldName();
+                return world.getWorldInfo().getWorldName();
             }
             catch (Throwable e)
             {
@@ -616,7 +627,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Long.toString(world.worldInfo.getSizeOnDisk());
+                return Long.toString(world.getWorldInfo().getSizeOnDisk());
             }
             catch (Throwable e)
             {
@@ -627,7 +638,7 @@ public class mod_ingameInfo extends BaseMod
         {
             try
             {
-                return Float.toString((((world.worldInfo.getSizeOnDisk() / 1024L) * 100L) / 1024L) / 100F);
+                return Float.toString((((world.getWorldInfo().getSizeOnDisk() / 1024L) * 100L) / 1024L) / 100F);
             }
             catch (Throwable e)
             {
@@ -907,11 +918,11 @@ public class mod_ingameInfo extends BaseMod
             {
                 if (mc.thePlayer.capabilities.isCreativeMode)
                     return "Creative";
-                else if (world.worldInfo.getGameType().equals(EnumGameType.SURVIVAL))
+                else if (world.getWorldInfo().getGameType().equals(EnumGameType.SURVIVAL))
                     return "Survival";
-                else if (world.worldInfo.getGameType().equals(EnumGameType.CREATIVE))
+                else if (world.getWorldInfo().getGameType().equals(EnumGameType.CREATIVE))
                     return "Creative/Survival?";
-                else if (world.worldInfo.getGameType().equals(EnumGameType.ADVENTURE))
+                else if (world.getWorldInfo().getGameType().equals(EnumGameType.ADVENTURE))
                     return "Adventure";
                 else
                     return "???";

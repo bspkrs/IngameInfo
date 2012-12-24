@@ -2,7 +2,7 @@
 {
   "modid" : "IngameInfo",
   "name" : "IngameInfo",
-  "version" : "ML 1.4.5.r01",
+  "version" : "ML 1.4.6.r01",
   "url" : "http://www.minecraftforum.net/topic/1009577-",
   "credits": "Original by DaftPVF, currently maintained by bspkrs",
   "authors": [
@@ -11,7 +11,7 @@
   ],
   "description": "Provides the ability to display many different player and world details on the in-game screen.",
   "logoFile" : "",
-  "updateUrl" : "https://dl.dropbox.com/u/20748481/Minecraft/1.4.5/ingameInfo.version",
+  "updateUrl" : "https://dl.dropbox.com/u/20748481/Minecraft/1.4.6/ingameInfo.version",
   "parent" : "",
   "screenshots": [
   ]
