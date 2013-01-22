@@ -20,10 +20,10 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import bspkrs.client.util.HUDUtils;
 import bspkrs.util.CommonUtils;
 import bspkrs.util.Coord;
 import bspkrs.util.ModVersionChecker;
-import bspkrs.util.client.HUDUtils;
 
 public class mod_ingameInfo extends BaseMod
 {
@@ -63,7 +63,7 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.6.r01";
+        return "ML 1.4.6.r02";
     }
     
     public mod_ingameInfo()
@@ -139,6 +139,7 @@ public class mod_ingameInfo extends BaseMod
                 mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
                 rowNum[alignMode]++;
             }
+            mc.fontRenderer.drawStringWithShadow("\247r", 1, 1, 0xffffff);
             
         }
         
@@ -980,7 +981,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("equippedname"))
         {
-            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.shiftedIndex ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.shiftedIndex) + ")" : "";
+            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.itemID ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID) + ")" : "";
             return mc.thePlayer.getCurrentEquippedItem() != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getItemName()) + arrows : "";
         }
         if (s.equalsIgnoreCase("equippeddamage"))
