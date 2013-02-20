@@ -35,24 +35,23 @@ public class mod_ingameInfo extends BaseMod
     String                    text[];
     String                    fileName;
     
-    @MLProp(info = "Set to true to allow checking for mod updates, false to disable")
-    public static boolean     allowUpdateCheck = true;
     @MLProp(info = "Valid memory unit strings are KB, MB, GB")
-    public static String      memoryUnit       = "MB";
+    public static String      memoryUnit    = "MB";
     @MLProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
-    public static String      xOffsets         = "2, 0, 2, 2, 0, 2, 2, 0, 2";
+    public static String      xOffsets      = "2, 0, 2, 2, 0, 2, 2, 0, 2";
     public static int[]       xOffset;
     @MLProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
-    public static String      yOffsets         = "2, 2, 2, 0, 0, 0, 2, 41, 2";
+    public static String      yOffsets      = "2, 2, 2, 0, 0, 0, 2, 41, 2";
     public static int[]       yOffset;
     @MLProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
-    public static boolean     showInChat       = false;
-    private final String[]    defaultConfig    = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
+    public static boolean     showInChat    = false;
+    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
     private final String      configPath;
     
     private ModVersionChecker versionChecker;
-    private final String      versionURL       = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.6/ingameInfo.version";
-    private final String      mcfTopic         = "http://www.minecraftforum.net/topic/1009577-";
+    private boolean           allowUpdateCheck;
+    private final String      versionURL    = "https://dl.dropbox.com/u/20748481/Minecraft/1.4.6/ingameInfo.version";
+    private final String      mcfTopic      = "http://www.minecraftforum.net/topic/1009577-";
     
     @Override
     public String getName()
@@ -63,7 +62,13 @@ public class mod_ingameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.4.6.r02";
+        return "ML 1.4.6.r03";
+    }
+    
+    @Override
+    public String getPriorities()
+    {
+        return "after:mod_bspkrsCore";
     }
     
     public mod_ingameInfo()
@@ -107,6 +112,7 @@ public class mod_ingameInfo extends BaseMod
         for (int i = 0; i < o.length; i++)
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
         
+        allowUpdateCheck = mod_bspkrsCore.allowUpdateCheck;
         if (allowUpdateCheck)
             versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic, ModLoader.getLogger());
     }
@@ -143,7 +149,7 @@ public class mod_ingameInfo extends BaseMod
             
         }
         
-        if (allowUpdateCheck)
+        if (allowUpdateCheck && versionChecker != null)
         {
             if (!versionChecker.isCurrentVersion())
                 for (String msg : versionChecker.getInGameMessage())
@@ -507,7 +513,8 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("dimension"))
         {
-            return mc.thePlayer.dimension == -1 ? "Nether" : mc.thePlayer.dimension == 1 ? "The End" : "Overworld";
+            // return mc.thePlayer.dimension == -1 ? "Nether" : mc.thePlayer.dimension == 1 ? "The End" : "Overworld";
+            return mc.theWorld.provider.getDimensionName();
         }
         if (s.toLowerCase().startsWith("daytime"))
         {
