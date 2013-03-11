@@ -989,7 +989,7 @@ public class mod_ingameInfo extends BaseMod
         if (s.equalsIgnoreCase("equippedname"))
         {
             String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.itemID ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID) + ")" : "";
-            return mc.thePlayer.getCurrentEquippedItem() != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getItemName()) + arrows : "";
+            return mc.thePlayer.getCurrentEquippedItem() != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getUnlocalizedName()) + arrows : "";
         }
         if (s.equalsIgnoreCase("equippeddamage"))
         {
@@ -1005,7 +1005,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("helmetname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("helmetdamage"))
         {
@@ -1021,7 +1021,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("chestplatename"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("chestplatedamage"))
         {
@@ -1037,7 +1037,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("leggingsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("leggingsdamage"))
         {
@@ -1053,7 +1053,7 @@ public class mod_ingameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("bootsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getItemName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("bootsdamage"))
         {
