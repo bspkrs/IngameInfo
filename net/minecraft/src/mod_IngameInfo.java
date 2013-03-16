@@ -25,7 +25,7 @@ import bspkrs.util.CommonUtils;
 import bspkrs.util.Coord;
 import bspkrs.util.ModVersionChecker;
 
-public class mod_ingameInfo extends BaseMod
+public class mod_IngameInfo extends BaseMod
 {
     private final Minecraft   mc;
     private ScaledResolution  scaledResolution;
@@ -50,7 +50,7 @@ public class mod_ingameInfo extends BaseMod
     
     private ModVersionChecker versionChecker;
     private boolean           allowUpdateCheck;
-    private final String      versionURL    = "https://dl.dropbox.com/u/20748481/Minecraft/1.5.0/ingameInfo.version";
+    private final String      versionURL    = "http://bspk.rs/Minecraft/1.5.0/ingameInfo.version";
     private final String      mcfTopic      = "http://www.minecraftforum.net/topic/1009577-";
     
     @Override
@@ -71,7 +71,7 @@ public class mod_ingameInfo extends BaseMod
         return "required-after:mod_bspkrsCore";
     }
     
-    public mod_ingameInfo()
+    public mod_IngameInfo()
     {
         mc = ModLoader.getMinecraftInstance();
         rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
