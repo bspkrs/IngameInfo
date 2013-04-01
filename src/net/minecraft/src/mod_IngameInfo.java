@@ -175,6 +175,9 @@ public class mod_IngameInfo extends BaseMod
         {
             ModLoader.getLogger().log(Level.WARNING, "Error getting ingameInfo.txt: " + e.getMessage());
             e.printStackTrace();
+            if (scanner != null)
+                scanner.close();
+            
             return new String[] { "" };
         }
         while (scanner.hasNextLine())
