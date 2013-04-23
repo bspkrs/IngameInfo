@@ -20,7 +20,12 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+
+import org.lwjgl.opengl.GL11;
+
 import bspkrs.client.util.HUDUtils;
+import bspkrs.util.BSProp;
+import bspkrs.util.BSPropRegistry;
 import bspkrs.util.CommonUtils;
 import bspkrs.util.Coord;
 import bspkrs.util.ModVersionChecker;
@@ -35,15 +40,15 @@ public class mod_IngameInfo extends BaseMod
     String                    text[];
     String                    fileName;
     
-    @MLProp(info = "Valid memory unit strings are KB, MB, GB")
+    @BSProp(info = "Valid memory unit strings are KB, MB, GB")
     public static String      memoryUnit    = "MB";
-    @MLProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
+    @BSProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
     public static String      xOffsets      = "2, 0, 2, 2, 0, 2, 2, 0, 2";
     public static int[]       xOffset;
-    @MLProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
+    @BSProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
     public static String      yOffsets      = "2, 2, 2, 0, 0, 0, 2, 41, 2";
     public static int[]       yOffset;
-    @MLProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
+    @BSProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
     public static boolean     showInChat    = false;
     private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
     private final String      configPath;
@@ -62,7 +67,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.5.1.r01";
+        return "ML 1.5.1.r02";
     }
     
     @Override
@@ -73,12 +78,18 @@ public class mod_IngameInfo extends BaseMod
     
     public mod_IngameInfo()
     {
+        BSPropRegistry.registerPropHandler(this.getClass());
         mc = ModLoader.getMinecraftInstance();
+        configPath = "/config/IngameInfo/";
+        fileName = "ingameInfo.txt";
+    }
+    
+    @Override
+    public void load()
+    {
         rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         xOffset = (new int[] { 2, 0, 2, 2, 0, 2, 2, 0, 2 });
         yOffset = (new int[] { 2, 2, 2, 0, 0, 0, 2, 41, 2 });
-        fileName = "ingameInfo.txt";
-        configPath = "/config/IngameInfo/";
         text = loadText(new File(mc.getMinecraftDir(), configPath + fileName));
         for (int i = 0; i < text.length; i++)
         {
@@ -114,14 +125,10 @@ public class mod_IngameInfo extends BaseMod
         
         allowUpdateCheck = mod_bspkrsCore.allowUpdateCheck;
         if (allowUpdateCheck)
+        {
             versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic);
-    }
-    
-    @Override
-    public void load()
-    {
-        if (allowUpdateCheck)
             versionChecker.checkVersionWithLogging();
+        }
         
         ModLoader.setInGameHook(this, true, false);
     }
@@ -135,6 +142,7 @@ public class mod_IngameInfo extends BaseMod
             rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             String lines[] = text;
             int i = lines.length;
+            GL11.glBindTexture(3553, mc.renderEngine.getTexture("/font/default.png"));
             for (int j = 0; j < i; j++)
             {
                 String s = lines[j];
