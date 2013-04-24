@@ -142,7 +142,10 @@ public class mod_IngameInfo extends BaseMod
             rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             String lines[] = text;
             int i = lines.length;
-            GL11.glBindTexture(3553, mc.renderEngine.getTexture("/font/default.png"));
+            
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            mc.renderEngine.resetBoundTexture();
+            
             for (int j = 0; j < i; j++)
             {
                 String s = lines[j];
@@ -153,8 +156,7 @@ public class mod_IngameInfo extends BaseMod
                 mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
                 rowNum[alignMode]++;
             }
-            mc.fontRenderer.drawStringWithShadow("\247r", 1, 1, 0xffffff);
-            
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         
         if (allowUpdateCheck && versionChecker != null)
@@ -163,7 +165,9 @@ public class mod_IngameInfo extends BaseMod
                 for (String msg : versionChecker.getInGameMessage())
                     mc.thePlayer.addChatMessage(msg);
             allowUpdateCheck = false;
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
+        
         return true;
     }
     
