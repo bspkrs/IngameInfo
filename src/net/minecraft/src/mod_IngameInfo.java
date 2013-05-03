@@ -27,6 +27,7 @@ import bspkrs.client.util.HUDUtils;
 import bspkrs.util.BSProp;
 import bspkrs.util.BSPropRegistry;
 import bspkrs.util.CommonUtils;
+import bspkrs.util.Const;
 import bspkrs.util.Coord;
 import bspkrs.util.ModVersionChecker;
 
@@ -55,7 +56,7 @@ public class mod_IngameInfo extends BaseMod
     
     private ModVersionChecker versionChecker;
     private boolean           allowUpdateCheck;
-    private final String      versionURL    = "http://bspk.rs/Minecraft/1.5.1/ingameInfo.version";
+    private final String      versionURL    = "http://bspk.rs/Minecraft/" + Const.MCVERSION + "/ingameInfo.version";
     private final String      mcfTopic      = "http://www.minecraftforum.net/topic/1009577-";
     
     @Override
@@ -67,7 +68,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML 1.5.1.r02";
+        return "ML " + Const.MCVERSION + ".r02";
     }
     
     @Override
