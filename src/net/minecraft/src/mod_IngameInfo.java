@@ -9,11 +9,14 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.logging.Level;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.item.Item;
+import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StringTranslate;
 import net.minecraft.world.EnumGameType;
 import net.minecraft.world.EnumSkyBlock;
@@ -935,7 +938,66 @@ public class mod_IngameInfo extends BaseMod
          * ********************************************************************************************************************
          * Player tags
          */
-        
+        if (s.equalsIgnoreCase("mouseover"))
+        {
+            MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+            if (objectMouseOver != null)
+            {
+                if (objectMouseOver.typeOfHit == EnumMovingObjectType.ENTITY)
+                {
+                    return objectMouseOver.entityHit.getEntityName();
+                }
+                else if (objectMouseOver.typeOfHit == EnumMovingObjectType.TILE)
+                {
+                    Block block = Block.blocksList[world.getBlockId(objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ)];
+                    if (block != null)
+                    {
+                        return block.getLocalizedName();
+                    }
+                }
+            }
+            return "";
+        }
+        if (s.equalsIgnoreCase("underwater") || s.equalsIgnoreCase("inwater"))
+        {
+            return Boolean.toString(mc.thePlayer.isInWater());
+        }
+        if (s.equalsIgnoreCase("wet"))
+        {
+            return Boolean.toString(mc.thePlayer.isWet());
+        }
+        if (s.equalsIgnoreCase("alive"))
+        {
+            return Boolean.toString(mc.thePlayer.isEntityAlive());
+        }
+        if (s.equalsIgnoreCase("burning"))
+        {
+            return Boolean.toString(mc.thePlayer.isBurning());
+        }
+        if (s.equalsIgnoreCase("riding"))
+        {
+            return Boolean.toString(mc.thePlayer.isRiding());
+        }
+        if (s.equalsIgnoreCase("sneaking"))
+        {
+            return Boolean.toString(mc.thePlayer.isSneaking());
+        }
+        if (s.equalsIgnoreCase("sprinting"))
+        {
+            return Boolean.toString(mc.thePlayer.isSprinting());
+        }
+        if (s.equalsIgnoreCase("invisible"))
+        {
+            return Boolean.toString(mc.thePlayer.isInvisible());
+        }
+        if (s.equalsIgnoreCase("eating"))
+        {
+            return Boolean.toString(mc.thePlayer.isEating());
+        }
+        if (s.equalsIgnoreCase("invulnerable"))
+        {
+            return Boolean.toString(mc.thePlayer.isEntityInvulnerable());
+        }
         if (s.equalsIgnoreCase("gamemode"))
         {
             try
