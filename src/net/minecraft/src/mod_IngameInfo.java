@@ -29,6 +29,7 @@ import org.lwjgl.opengl.GL11;
 import bspkrs.client.util.HUDUtils;
 import bspkrs.util.BSProp;
 import bspkrs.util.BSPropRegistry;
+import bspkrs.util.BlockID;
 import bspkrs.util.CommonUtils;
 import bspkrs.util.Const;
 import bspkrs.util.Coord;
@@ -953,6 +954,26 @@ public class mod_IngameInfo extends BaseMod
                     if (block != null)
                     {
                         return block.getLocalizedName();
+                    }
+                }
+            }
+            return "";
+        }
+        if (s.equalsIgnoreCase("mouseoverid"))
+        {
+            MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+            if (objectMouseOver != null)
+            {
+                if (objectMouseOver.typeOfHit == EnumMovingObjectType.ENTITY)
+                {
+                    return objectMouseOver.entityHit.entityId + "";
+                }
+                else if (objectMouseOver.typeOfHit == EnumMovingObjectType.TILE)
+                {
+                    BlockID blockID = new BlockID(world, objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ);
+                    if (blockID.id != 0)
+                    {
+                        return blockID.toString();
                     }
                 }
             }
