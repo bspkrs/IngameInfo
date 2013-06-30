@@ -1,0 +1,71 @@
+1.5.2.r01 - 03-May-2013
+- updated for 1.5.2
+1.5.1.r02 (24-Apr-2013)
+- addressed potential issue from mods that don't clean up their texture bindings
+- new config handler
+1.5.1.r01 - 23-Mar-2013
+- updated for 1.5.1
+1.5.0.r01 - 15-Mar-2013
+- updated for 1.5
+1.4.6.r03 - 20-Feb-2013
+- updated to support bspkrsCore
+- fixed dimension tag to properly support non-vanilla dimensions
+1.4.6.r02 - 24-Jan-2013
+- added reset code to end of all drawn text
+1.4.6.r01 - 23-Dec-2012
+- 1.4.6 update
+1.4.5.r01 - 21-Nov-2012
+- updated for 1.4.5
+1.4.4.r01 - 13-Nov-2012
+- updated for 1.4.4
+- added default config file
+1.4.2.r02 (ML) - 02-Nov-2012
+- fixed tick registration issue with Forge
+1.4.2.r01 (ML) - 26-Oct-2012
+- update to 1.4.2
+- fixed snowing tag
+- small code optimizations
+1.3.2.r01 (ML) - 04-Oct-2012
+- new tags for <dimension>, <nextrain> (time until rain), <snowing[/]>, <difficulty>, and a bunch for text formatting
+- added format parameters for <mctime[]> and <rltime[]>
+- fixed <raining[/]>
+- fixed a major issue with all middle alignments
+- added new config options for x and y screen offsets
+- refactored a lot of the code
+- shared version checking
+1.3.2.k 02-Sep-2012
+- added <memtotal>, <memmax>, <memfree>, and <memused> tags
+- finally fixed the issues with the various alignment tags
+- added option to display info with chat open
+- fixed update check logical flaw
+1.3.2.j 28-Aug-2012
+- changed all world objects to use integrated server in SSP
+- added Lunatrius's new info tags (lightfeet, lightnosunfeet, entitiesrendered, entitiestotal, decx, decy, decz, decyfeet, yfeet)
+- updated gamemode tag to include Adventure and detect when the player changes the gamemode using /gamemode command
+- now includes mcmod.info file
+1.3.2.i 19-Aug-2012
+- updated for 1.3.2
+- fixed slimes tag
+- fixed gamemode tag
+1.3.1.h 5-Aug-2012
+- updated for 1.3.1
+- added <lightnosun> tag
+- fixed <mctime> tag
+- added version checking
+1.2.5.g 18-Jun-2012
+- added exception handling for a bunch of tags to handle issues when y < 0 or y > 256
+1.2.5.f 08-Jun-2012
+- fixed methods to get the light level and biome when playing SMP
+- added the <irltime> tag to display your local time in-game
+- added experimental tag <mctime> which attempts to figure out the in-game world time
+1.2.5.e 06-Jun-2012
+- added code to <equippedname> to show the number of arrows in your inventory when a bow is equipped
+1.2.5.d 04-Apr-2012
+- added directional heading tags and equipped armor tags (name, damage, etc for helmet, chestplate, leggings, and boots)
+1.2.3.c - 11-Mar-2012
+- added tags for <max> and <pct>
+- added damage, damage left, and max damage tags for currently equipped item
+1.2.3.b - 08-Mar-2012
+- new alignment tags for middle and bottom of the screen
+1.2.3.a - 05-Mar-2012
+- initial 1.2.3 update
