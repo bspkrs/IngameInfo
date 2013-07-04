@@ -17,7 +17,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.StringTranslate;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.EnumGameType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -55,7 +55,7 @@ public class mod_IngameInfo extends BaseMod
     public static int[]       yOffset;
     @BSProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
     public static boolean     showInChat    = false;
-    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
+    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>", "<topmiddle>&fTP: <texturepack>" };
     private final String      configPath;
     
     private ModVersionChecker versionChecker;
@@ -72,7 +72,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r03";
+        return "ML " + Const.MCVERSION + ".r01";
     }
     
     @Override
@@ -95,7 +95,7 @@ public class mod_IngameInfo extends BaseMod
         rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         xOffset = (new int[] { 2, 0, 2, 2, 0, 2, 2, 0, 2 });
         yOffset = (new int[] { 2, 2, 2, 0, 0, 0, 2, 41, 2 });
-        text = loadText(new File(mc.getMinecraftDir(), configPath + fileName));
+        text = loadText(new File(CommonUtils.getMinecraftDir(), configPath + fileName));
         for (int i = 0; i < text.length; i++)
         {
             if (text[i].toLowerCase().contains("<left>") || text[i].toLowerCase().contains("<topleft>"))
@@ -149,7 +149,7 @@ public class mod_IngameInfo extends BaseMod
             int i = lines.length;
             
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            mc.renderEngine.resetBoundTexture();
+            //mc.renderEngine.resetBoundTexture();
             
             for (int j = 0; j < i; j++)
             {
@@ -207,7 +207,7 @@ public class mod_IngameInfo extends BaseMod
     
     private File createFile()
     {
-        File file = new File(mc.getMinecraftDir(), configPath);
+        File file = new File(CommonUtils.getMinecraftDir(), configPath);
         
         if (!file.exists())
             file.mkdir();
@@ -1083,12 +1083,12 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("texturepack"))
         {
-            return mc.texturePackList.getSelectedTexturePack().getTexturePackFileName();
+            return mc.gameSettings.skin;
         }
         if (s.equalsIgnoreCase("equippedname"))
         {
             String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.itemID ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID) + ")" : "";
-            return mc.thePlayer.getCurrentEquippedItem() != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.getCurrentEquippedItem().getItem().getUnlocalizedName()) + arrows : "";
+            return mc.thePlayer.getCurrentEquippedItem() != null ? StatCollector.translateToLocal(mc.thePlayer.getCurrentEquippedItem().getItem().getUnlocalizedName()) + arrows : "";
         }
         if (s.equalsIgnoreCase("equippeddamage"))
         {
@@ -1104,7 +1104,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("helmetname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("helmetdamage"))
         {
@@ -1120,7 +1120,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("chestplatename"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("chestplatedamage"))
         {
@@ -1136,7 +1136,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("leggingsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("leggingsdamage"))
         {
@@ -1152,7 +1152,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("bootsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StringTranslate.getInstance().translateNamedKey(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getUnlocalizedName()) : "";
         }
         if (s.equalsIgnoreCase("bootsdamage"))
         {
