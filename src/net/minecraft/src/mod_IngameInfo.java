@@ -55,12 +55,12 @@ public class mod_IngameInfo extends BaseMod
     public static int[]       yOffset;
     @BSProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
     public static boolean     showInChat    = false;
-    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>", "<topmiddle>&fTP: <texturepack>" };
+    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>", "<topright>&fTP: <texturepack>" };
     private final String      configPath;
     
     private ModVersionChecker versionChecker;
     private boolean           allowUpdateCheck;
-    private final String      versionURL    = "http://bspk.rs/Minecraft/" + Const.MCVERSION + "/ingameInfo.version";
+    private final String      versionURL    = Const.VERSION_URL + "/Minecraft/" + Const.MCVERSION + "/ingameInfo.version";
     private final String      mcfTopic      = "http://www.minecraftforum.net/topic/1009577-";
     
     @Override
@@ -72,7 +72,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r01";
+        return "ML " + Const.MCVERSION + ".r02";
     }
     
     @Override
