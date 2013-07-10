@@ -72,7 +72,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r02";
+        return "ML " + Const.MCVERSION + ".r01";
     }
     
     @Override
