@@ -13,11 +13,14 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.EnumGameType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -44,6 +47,7 @@ public class mod_IngameInfo extends BaseMod
     int                       rowCount[];
     String                    text[];
     String                    fileName;
+    private boolean           enabled       = true;
     
     @BSProp(info = "Valid memory unit strings are KB, MB, GB")
     public static String      memoryUnit    = "MB";
@@ -55,7 +59,7 @@ public class mod_IngameInfo extends BaseMod
     public static int[]       yOffset;
     @BSProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
     public static boolean     showInChat    = false;
-    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>", "<topright>&fTP: <texturepack>" };
+    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
     private final String      configPath;
     
     private ModVersionChecker versionChecker;
@@ -72,7 +76,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r01";
+        return "ML " + Const.MCVERSION + ".r02";
     }
     
     @Override
@@ -89,9 +93,9 @@ public class mod_IngameInfo extends BaseMod
         fileName = "ingameInfo.txt";
     }
     
-    @Override
-    public void load()
+    public void loadFormatFile()
     {
+        alignMode = 0;
         rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         xOffset = (new int[] { 2, 0, 2, 2, 0, 2, 2, 0, 2 });
         yOffset = (new int[] { 2, 2, 2, 0, 0, 0, 2, 41, 2 });
@@ -127,6 +131,15 @@ public class mod_IngameInfo extends BaseMod
         o = yOffsets.split(",");
         for (int i = 0; i < o.length; i++)
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
+    }
+    
+    @Override
+    public void load()
+    {
+        loadFormatFile();
+        
+        ModLoader.addCommand(new CommandIGI());
+        ModLoader.addLocalization("commands.igi.usage", "igi [reload/enable/disable/toggle]");
         
         allowUpdateCheck = mod_bspkrsCore.allowUpdateCheck;
         if (allowUpdateCheck)
@@ -141,7 +154,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public boolean onTickInGame(float f, Minecraft mc)
     {
-        if ((mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
+        if (enabled && (mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
         {
             scaledResolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
             rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -153,14 +166,23 @@ public class mod_IngameInfo extends BaseMod
             
             for (int j = 0; j < i; j++)
             {
-                String s = lines[j];
-                s = replaceAllTags(s);
-                // if(!(alignMode == 6 && mc.currentScreen != null &&
-                // mc.currentScreen instanceof GuiChat)) //if chat is open,
-                // don't display bottomleft info
-                mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
-                rowNum[alignMode]++;
+                try
+                {
+                    String s = lines[j];
+                    s = replaceAllTags(s);
+                    // if(!(alignMode == 6 && mc.currentScreen != null &&
+                    // mc.currentScreen instanceof GuiChat)) //if chat is open, don't display bottomleft info
+                    mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
+                    rowNum[alignMode]++;
+                }
+                catch (Throwable e)
+                {
+                    mc.thePlayer.addChatMessage(String.format("IngameInfo encountered an exception parsing ingameInfo.txt. Check %s for details.", CommonUtils.getLogFileName()));
+                    e.printStackTrace();
+                    enabled = false;
+                }
             }
+            
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         
@@ -265,13 +287,11 @@ public class mod_IngameInfo extends BaseMod
         int endIndex = s.indexOf('>');
         int openParamIndex = s.indexOf('[', startIndex);
         if (openParamIndex < endIndex)
-        {
             endIndex = s.indexOf('>', s.indexOf(']', startIndex));
-        }
-        if (startIndex == -1 || endIndex == -1)
-        {
+        if (startIndex == -1)
             return s;
-        }
+        else if (endIndex == -1)
+            return s.replace("<", "");
         else
         {
             String s1 = s.substring(startIndex + 1, endIndex);
@@ -953,6 +973,11 @@ public class mod_IngameInfo extends BaseMod
                     Block block = Block.blocksList[world.getBlockId(objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ)];
                     if (block != null)
                     {
+                        ItemStack pickBlock = block.getPickBlock(objectMouseOver, world, objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ);
+                        if (pickBlock != null)
+                        {
+                            return pickBlock.getDisplayName();
+                        }
                         return block.getLocalizedName();
                     }
                 }
@@ -978,6 +1003,60 @@ public class mod_IngameInfo extends BaseMod
                 }
             }
             return "";
+        }
+        if (s.equalsIgnoreCase("mouseoverpowerweak"))
+        {
+            MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+            if (objectMouseOver != null)
+            {
+                if (objectMouseOver.typeOfHit == EnumMovingObjectType.TILE)
+                {
+                    Block block = Block.blocksList[world.getBlockId(objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ)];
+                    if (block != null)
+                    {
+                        int power = -1;
+                        for (int side = 0; side < 6; side++)
+                        {
+                            power = Math.max(power, block.isProvidingWeakPower(world, objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ, side));
+                        }
+                        return Integer.toString(power);
+                    }
+                }
+            }
+            return "-1";
+        }
+        if (s.equalsIgnoreCase("mouseoverpowerstrong"))
+        {
+            MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+            if (objectMouseOver != null)
+            {
+                if (objectMouseOver.typeOfHit == EnumMovingObjectType.TILE)
+                {
+                    Block block = Block.blocksList[world.getBlockId(objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ)];
+                    if (block != null)
+                    {
+                        int power = -1;
+                        for (int side = 0; side < 6; side++)
+                        {
+                            power = Math.max(power, block.isProvidingStrongPower(world, objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ, side));
+                        }
+                        return Integer.toString(power);
+                    }
+                }
+            }
+            return "-1";
+        }
+        if (s.equalsIgnoreCase("mouseoverpowerinput"))
+        {
+            MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+            if (objectMouseOver != null)
+            {
+                if (objectMouseOver.typeOfHit == EnumMovingObjectType.TILE)
+                {
+                    return Integer.toString(world.getBlockPowerInput(objectMouseOver.blockX, objectMouseOver.blockY, objectMouseOver.blockZ));
+                }
+            }
+            return "-1";
         }
         if (s.equalsIgnoreCase("underwater") || s.equalsIgnoreCase("inwater"))
         {
@@ -1088,7 +1167,7 @@ public class mod_IngameInfo extends BaseMod
         if (s.equalsIgnoreCase("equippedname"))
         {
             String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.itemID ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID) + ")" : "";
-            return mc.thePlayer.getCurrentEquippedItem() != null ? StatCollector.translateToLocal(mc.thePlayer.getCurrentEquippedItem().getItem().getUnlocalizedName()) + arrows : "";
+            return mc.thePlayer.getCurrentEquippedItem() != null ? mc.thePlayer.getCurrentEquippedItem().getDisplayName() + arrows : "";
         }
         if (s.equalsIgnoreCase("equippeddamage"))
         {
@@ -1104,7 +1183,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("helmetname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(3).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? mc.thePlayer.inventory.armorItemInSlot(3).getDisplayName() : "";
         }
         if (s.equalsIgnoreCase("helmetdamage"))
         {
@@ -1120,7 +1199,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("chestplatename"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(2).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? mc.thePlayer.inventory.armorItemInSlot(2).getDisplayName() : "";
         }
         if (s.equalsIgnoreCase("chestplatedamage"))
         {
@@ -1136,7 +1215,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("leggingsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(1).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? mc.thePlayer.inventory.armorItemInSlot(1).getDisplayName() : "";
         }
         if (s.equalsIgnoreCase("leggingsdamage"))
         {
@@ -1152,7 +1231,7 @@ public class mod_IngameInfo extends BaseMod
         }
         if (s.equalsIgnoreCase("bootsname"))
         {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? StatCollector.translateToLocal(mc.thePlayer.inventory.armorItemInSlot(0).getItem().getUnlocalizedName()) : "";
+            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? mc.thePlayer.inventory.armorItemInSlot(0).getDisplayName() : "";
         }
         if (s.equalsIgnoreCase("bootsdamage"))
         {
@@ -1196,5 +1275,51 @@ public class mod_IngameInfo extends BaseMod
             s1 = s.substring(s.indexOf('/') + 1, s.indexOf(']'));
         }
         return s1;
+    }
+    
+    public class CommandIGI extends CommandBase
+    {
+        @Override
+        public String getCommandName()
+        {
+            return "igi";
+        }
+        
+        @Override
+        public String getCommandUsage(ICommandSender icommandsender)
+        {
+            return "commands.igi.usage";
+        }
+        
+        @Override
+        public void processCommand(ICommandSender icommandsender, String[] args)
+        {
+            if (args.length == 1)
+            {
+                if (args[0].equalsIgnoreCase("reload"))
+                {
+                    loadFormatFile();
+                    enabled = true;
+                    return;
+                }
+                else if (args[0].equalsIgnoreCase("enable"))
+                {
+                    enabled = true;
+                    return;
+                }
+                else if (args[0].equalsIgnoreCase("disable"))
+                {
+                    enabled = false;
+                    return;
+                }
+                else if (args[0].equalsIgnoreCase("toggle"))
+                {
+                    enabled = !enabled;
+                    return;
+                }
+            }
+            
+            throw new WrongUsageException("commands.igi.usage", new Object[0]);
+        }
     }
 }
