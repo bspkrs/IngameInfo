@@ -1,3 +1,5 @@
+1.6.2.r03 - 10-Sep-2013
+- added new tag <invcount[id(,metadata)]>
 1.6.2.r02 - 17-Jul-2013
 - fixed item display names
 - added new tags by Lunatrius
