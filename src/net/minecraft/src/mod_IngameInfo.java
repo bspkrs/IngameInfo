@@ -76,7 +76,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r02";
+        return "ML " + Const.MCVERSION + ".r03";
     }
     
     @Override
@@ -1163,6 +1163,24 @@ public class mod_IngameInfo extends BaseMod
         if (s.equalsIgnoreCase("texturepack"))
         {
             return mc.gameSettings.skin;
+        }
+        if (s.toLowerCase().startsWith("invcount"))
+        {
+            int startIndex = s.indexOf('[');
+            int endIndex = s.indexOf(']', startIndex + 1);
+            
+            if (startIndex != -1 && endIndex != -1)
+            {
+                String ss = s.substring(startIndex + 1, endIndex).trim();
+                String[] sa = ss.split(",");
+                int id = CommonUtils.parseInt(sa[0].trim());
+                int md = -1;
+                if (sa.length > 1)
+                    md = CommonUtils.parseInt(sa[1].trim());
+                return HUDUtils.countInInventory(mc.thePlayer, id, md) + "";
+            }
+            
+            return "invcount syntax error";
         }
         if (s.equalsIgnoreCase("equippedname"))
         {
