@@ -1164,7 +1164,7 @@ public class mod_IngameInfo extends BaseMod
         {
             return mc.gameSettings.skin;
         }
-        if (s.toLowerCase().startsWith("invcount"))
+        if (s.toLowerCase().startsWith("itemquantity"))
         {
             int startIndex = s.indexOf('[');
             int endIndex = s.indexOf(']', startIndex + 1);
@@ -1180,7 +1180,16 @@ public class mod_IngameInfo extends BaseMod
                 return HUDUtils.countInInventory(mc.thePlayer, id, md) + "";
             }
             
-            return "invcount syntax error";
+            return "itemquantity syntax error";
+        }
+        if (s.equalsIgnoreCase("equippedquantity"))
+        {
+            ItemStack item = mc.thePlayer.getCurrentEquippedItem();
+            if (item != null)
+            {
+                return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, item.itemID, item.getItemDamage()));
+            }
+            return "0";
         }
         if (s.equalsIgnoreCase("equippedname"))
         {
