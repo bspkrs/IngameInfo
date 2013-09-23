@@ -36,6 +36,7 @@ import bspkrs.util.BlockID;
 import bspkrs.util.CommonUtils;
 import bspkrs.util.Const;
 import bspkrs.util.Coord;
+import bspkrs.util.ForgeUtils;
 import bspkrs.util.ModVersionChecker;
 
 public class mod_IngameInfo extends BaseMod
@@ -48,6 +49,7 @@ public class mod_IngameInfo extends BaseMod
     String                    text[];
     String                    fileName;
     private boolean           enabled       = true;
+    private boolean           isForgeEnv    = false;
     
     @BSProp(info = "Valid memory unit strings are KB, MB, GB")
     public static String      memoryUnit    = "MB";
@@ -76,7 +78,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r01";
+        return "ML " + Const.MCVERSION + ".r02";
     }
     
     @Override
@@ -149,6 +151,8 @@ public class mod_IngameInfo extends BaseMod
         }
         
         ModLoader.setInGameHook(this, true, false);
+        
+        isForgeEnv = ForgeUtils.isForgeEnv();
     }
     
     @Override
@@ -1182,107 +1186,90 @@ public class mod_IngameInfo extends BaseMod
             
             return "itemquantity syntax error";
         }
+        
+        ItemStack itemStack = mc.thePlayer.getCurrentEquippedItem();
+        Item item = itemStack.getItem();
         if (s.equalsIgnoreCase("equippedquantity"))
         {
-            ItemStack item = mc.thePlayer.getCurrentEquippedItem();
-            if (item != null)
+            if (itemStack != null)
             {
-                return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, item.itemID, item.getItemDamage()));
+                return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, itemStack.getItemDamage()));
             }
             return "0";
         }
-        if (s.equalsIgnoreCase("equippedname"))
+        
+        if (s.matches("(equipped|helmet|chestplate|leggings|boots)(name|maxdamage|damage|damageleft)"))
         {
-            String arrows = mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().itemID == Item.bow.itemID ? "(" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID) + ")" : "";
-            return mc.thePlayer.getCurrentEquippedItem() != null ? mc.thePlayer.getCurrentEquippedItem().getDisplayName() + arrows : "";
-        }
-        if (s.equalsIgnoreCase("equippeddamage"))
-        {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getItemDamage()) : "0";
-        }
-        if (s.equalsIgnoreCase("equippeddamageleft"))
-        {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf((mc.thePlayer.getCurrentEquippedItem().getMaxDamage() + 1) - (mc.thePlayer.getCurrentEquippedItem().getItemDamage())) : "0";
-        }
-        if (s.equalsIgnoreCase("equippedmaxdamage"))
-        {
-            return mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().isItemStackDamageable() ? String.valueOf(mc.thePlayer.getCurrentEquippedItem().getMaxDamage() + 1) : "0";
-        }
-        if (s.equalsIgnoreCase("helmetname"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null ? mc.thePlayer.inventory.armorItemInSlot(3).getDisplayName() : "";
-        }
-        if (s.equalsIgnoreCase("helmetdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage()) : "0";
-        }
-        if (s.equalsIgnoreCase("helmetdamageleft"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(3).getItemDamage())) : "0";
-        }
-        if (s.equalsIgnoreCase("helmetmaxdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(3) != null && mc.thePlayer.inventory.armorItemInSlot(3).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(3).getMaxDamage() + 1) : "0";
-        }
-        if (s.equalsIgnoreCase("chestplatename"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null ? mc.thePlayer.inventory.armorItemInSlot(2).getDisplayName() : "";
-        }
-        if (s.equalsIgnoreCase("chestplatedamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage()) : "0";
-        }
-        if (s.equalsIgnoreCase("chestplatedamageleft"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(2).getItemDamage())) : "0";
-        }
-        if (s.equalsIgnoreCase("chestplatemaxdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(2) != null && mc.thePlayer.inventory.armorItemInSlot(2).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(2).getMaxDamage() + 1) : "0";
-        }
-        if (s.equalsIgnoreCase("leggingsname"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null ? mc.thePlayer.inventory.armorItemInSlot(1).getDisplayName() : "";
-        }
-        if (s.equalsIgnoreCase("leggingsdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage()) : "0";
-        }
-        if (s.equalsIgnoreCase("leggingsdamageleft"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(1).getItemDamage())) : "0";
-        }
-        if (s.equalsIgnoreCase("leggingsmaxdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(1) != null && mc.thePlayer.inventory.armorItemInSlot(1).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(1).getMaxDamage() + 1) : "0";
-        }
-        if (s.equalsIgnoreCase("bootsname"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null ? mc.thePlayer.inventory.armorItemInSlot(0).getDisplayName() : "";
-        }
-        if (s.equalsIgnoreCase("bootsdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage()) : "0";
-        }
-        if (s.equalsIgnoreCase("bootsdamageleft"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf((mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage() + 1) - (mc.thePlayer.inventory.armorItemInSlot(0).getItemDamage())) : "0";
-        }
-        if (s.equalsIgnoreCase("bootsmaxdamage"))
-        {
-            return mc.thePlayer.inventory.armorItemInSlot(0) != null && mc.thePlayer.inventory.armorItemInSlot(0).isItemStackDamageable() ? String.valueOf(mc.thePlayer.inventory.armorItemInSlot(0).getMaxDamage() + 1) : "0";
-        }
-        else
-        {
-            try
+            if (s.startsWith("equipped"))
             {
-                Float.valueOf(s);
-                return s;
+                itemStack = mc.thePlayer.getCurrentEquippedItem();
             }
-            catch (Throwable e)
+            else
             {
-                return "";
+                int slot = -1;
+                if (s.startsWith("helmet"))
+                {
+                    slot = 3;
+                }
+                else if (s.startsWith("chestplate"))
+                {
+                    slot = 2;
+                }
+                else if (s.startsWith("leggings"))
+                {
+                    slot = 1;
+                }
+                else if (s.startsWith("boots"))
+                {
+                    slot = 0;
+                }
+                itemStack = mc.thePlayer.inventory.armorItemInSlot(slot);
             }
+            
+            if (itemStack != null)
+            {
+                item = itemStack.getItem();
+                
+                if (item != null)
+                {
+                    if (s.endsWith("name"))
+                    {
+                        String arrows = itemStack.itemID == Item.bow.itemID ? " (" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID, -1) + ")" : "";
+                        return itemStack.getDisplayName() + arrows;
+                    }
+                    else if (s.endsWith("maxdamage"))
+                    {
+                        if (isForgeEnv)
+                            return Integer.toString(item.isDamageable() ? item.getMaxDamage(itemStack) + 1 : 0);
+                        else
+                            return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getMaxDamage() + 1 : 0);
+                    }
+                    else if (s.endsWith("damage"))
+                    {
+                        if (isForgeEnv)
+                            return Integer.toString(item.isDamageable() ? item.getDamage(itemStack) : 0);
+                        else
+                            return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getItemDamage() : 0);
+                    }
+                    else if (s.endsWith("damageleft"))
+                    {
+                        if (isForgeEnv)
+                            return Integer.toString(item.isDamageable() ? item.getMaxDamage(itemStack) + 1 - item.getDamage(itemStack) : 0);
+                        else
+                            return Integer.toString(itemStack.isItemStackDamageable() ? (itemStack.getMaxDamage() + 1) - (itemStack.getItemDamage()) : 0);
+                    }
+                }
+            }
+        }
+        
+        try
+        {
+            Float.valueOf(s);
+            return s;
+        }
+        catch (Throwable e)
+        {
+            return "";
         }
     }
     
