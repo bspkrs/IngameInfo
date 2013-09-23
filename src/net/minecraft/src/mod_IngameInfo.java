@@ -1188,12 +1188,15 @@ public class mod_IngameInfo extends BaseMod
         }
         
         ItemStack itemStack = mc.thePlayer.getCurrentEquippedItem();
-        Item item = itemStack.getItem();
         if (s.equalsIgnoreCase("equippedquantity"))
         {
             if (itemStack != null)
             {
-                return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, itemStack.getItemDamage()));
+                Item item = itemStack.getItem();
+                if (isForgeEnv)
+                    return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, item.getDamage(itemStack)));
+                else
+                    return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, itemStack.getItemDamage()));
             }
             return "0";
         }
@@ -1228,7 +1231,7 @@ public class mod_IngameInfo extends BaseMod
             
             if (itemStack != null)
             {
-                item = itemStack.getItem();
+                Item item = itemStack.getItem();
                 
                 if (item != null)
                 {
