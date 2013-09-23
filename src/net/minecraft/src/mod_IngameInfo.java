@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.StringTranslate;
 import net.minecraft.world.EnumGameType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -78,7 +79,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r02";
+        return "ML " + Const.MCVERSION + ".r03";
     }
     
     @Override
@@ -1107,11 +1108,11 @@ public class mod_IngameInfo extends BaseMod
             try
             {
                 if (mc.thePlayer.capabilities.isCreativeMode)
-                    return "Creative";
+                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.creative");
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.SURVIVAL))
-                    return "Survival";
+                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.survival");
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.CREATIVE))
-                    return "Creative/Survival?";
+                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.creative") + "/" + StringTranslate.getInstance().translateKey("selectWorld.gameMode.survival") + "?";
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.ADVENTURE))
                     return "Adventure";
                 else
@@ -1136,13 +1137,13 @@ public class mod_IngameInfo extends BaseMod
         if (s.equalsIgnoreCase("difficulty"))
         {
             if (mc.gameSettings.difficulty == 0)
-                return "Peaceful";
+                return StringTranslate.getInstance().translateKey("options.difficulty.peaceful");
             else if (mc.gameSettings.difficulty == 1)
-                return "Easy";
+                return StringTranslate.getInstance().translateKey("options.difficulty.easy");
             else if (mc.gameSettings.difficulty == 2)
-                return "Normal";
+                return StringTranslate.getInstance().translateKey("options.difficulty.normal");
             else if (mc.gameSettings.difficulty == 3)
-                return "Hard";
+                return StringTranslate.getInstance().translateKey("options.difficulty.hard");
         }
         if (s.equalsIgnoreCase("playerlevel"))
         {
@@ -1192,11 +1193,7 @@ public class mod_IngameInfo extends BaseMod
         {
             if (itemStack != null)
             {
-                Item item = itemStack.getItem();
-                if (isForgeEnv)
-                    return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, item.getDamage(itemStack)));
-                else
-                    return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, itemStack.getItemDamage()));
+                return Integer.toString(HUDUtils.countInInventory(mc.thePlayer, itemStack.itemID, itemStack.getItemDamage()));
             }
             return "0";
         }
@@ -1231,38 +1228,21 @@ public class mod_IngameInfo extends BaseMod
             
             if (itemStack != null)
             {
-                Item item = itemStack.getItem();
-                
-                if (item != null)
+                if (s.endsWith("name"))
                 {
-                    if (s.endsWith("name"))
-                    {
-                        String arrows = itemStack.itemID == Item.bow.itemID ? " (" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID, -1) + ")" : "";
-                        return itemStack.getDisplayName() + arrows;
-                    }
-                    else if (s.endsWith("maxdamage"))
-                    {
-                        if (isForgeEnv)
-                            return Integer.toString(item.isDamageable() ? item.getMaxDamage(itemStack) + 1 : 0);
-                        else
-                            return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getMaxDamage() + 1 : 0);
-                    }
-                    else if (s.endsWith("damage"))
-                    {
-                        if (isForgeEnv)
-                            return Integer.toString(item.isDamageable() ? item.getDamage(itemStack) : 0);
-                        else
-                            return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getItemDamage() : 0);
-                    }
-                    else if (s.endsWith("damageleft"))
-                    {
-                        if (isForgeEnv)
-                            return Integer.toString(item.isDamageable() ? item.getMaxDamage(itemStack) + 1 - item.getDamage(itemStack) : 0);
-                        else
-                            return Integer.toString(itemStack.isItemStackDamageable() ? (itemStack.getMaxDamage() + 1) - (itemStack.getItemDamage()) : 0);
-                    }
+                    String arrows = itemStack.itemID == Item.bow.itemID ? " (" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID, -1) + ")" : "";
+                    return itemStack.getDisplayName() + arrows;
                 }
+                else if (s.endsWith("maxdamage"))
+                    return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getMaxDamage() + 1 : 0);
+                else if (s.endsWith("damage"))
+                    return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getItemDamageForDisplay() : 0);
+                else if (s.endsWith("damageleft"))
+                    return Integer.toString(itemStack.isItemStackDamageable() ? (itemStack.getMaxDamage() + 1) - itemStack.getItemDamageForDisplay() : 0);
+                
             }
+            else
+                return "0";
         }
         
         try
