@@ -21,7 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.StringTranslate;
 import net.minecraft.world.EnumGameType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -1108,11 +1107,11 @@ public class mod_IngameInfo extends BaseMod
             try
             {
                 if (mc.thePlayer.capabilities.isCreativeMode)
-                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.creative");
+                    return "Creative";
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.SURVIVAL))
-                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.survival");
+                    return "Survival";
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.CREATIVE))
-                    return StringTranslate.getInstance().translateKey("selectWorld.gameMode.creative") + "/" + StringTranslate.getInstance().translateKey("selectWorld.gameMode.survival") + "?";
+                    return "Creative/Survival?";
                 else if (world.getWorldInfo().getGameType().equals(EnumGameType.ADVENTURE))
                     return "Adventure";
                 else
@@ -1137,13 +1136,13 @@ public class mod_IngameInfo extends BaseMod
         if (s.equalsIgnoreCase("difficulty"))
         {
             if (mc.gameSettings.difficulty == 0)
-                return StringTranslate.getInstance().translateKey("options.difficulty.peaceful");
+                return "Peaceful";
             else if (mc.gameSettings.difficulty == 1)
-                return StringTranslate.getInstance().translateKey("options.difficulty.easy");
+                return "Easy";
             else if (mc.gameSettings.difficulty == 2)
-                return StringTranslate.getInstance().translateKey("options.difficulty.normal");
+                return "Normal";
             else if (mc.gameSettings.difficulty == 3)
-                return StringTranslate.getInstance().translateKey("options.difficulty.hard");
+                return "Hard";
         }
         if (s.equalsIgnoreCase("playerlevel"))
         {
