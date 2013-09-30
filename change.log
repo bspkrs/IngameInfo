@@ -1,3 +1,5 @@
+1.6.4.r03 - 30-Sep-2013
+- fixed item damage tags not returning 0 when item is null
 1.6.4.r02 - 23-Sep-2013
 - refactored item damage tags to use getItemDamageForDisplay()
 1.6.4.r01 - 20-Sep-2013
