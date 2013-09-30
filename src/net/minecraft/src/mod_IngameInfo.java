@@ -78,7 +78,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r04";
+        return "ML " + Const.MCVERSION + ".r05";
     }
     
     @Override
@@ -1197,28 +1197,28 @@ public class mod_IngameInfo extends BaseMod
             return "0";
         }
         
-        if (s.matches("(equipped|helmet|chestplate|leggings|boots)(name|maxdamage|damage|damageleft)"))
+        if (s.toLowerCase().matches("(equipped|helmet|chestplate|leggings|boots)(name|maxdamage|damage|damageleft)"))
         {
-            if (s.startsWith("equipped"))
+            if (s.toLowerCase().startsWith("equipped"))
             {
                 itemStack = mc.thePlayer.getCurrentEquippedItem();
             }
             else
             {
                 int slot = -1;
-                if (s.startsWith("helmet"))
+                if (s.toLowerCase().startsWith("helmet"))
                 {
                     slot = 3;
                 }
-                else if (s.startsWith("chestplate"))
+                else if (s.toLowerCase().startsWith("chestplate"))
                 {
                     slot = 2;
                 }
-                else if (s.startsWith("leggings"))
+                else if (s.toLowerCase().startsWith("leggings"))
                 {
                     slot = 1;
                 }
-                else if (s.startsWith("boots"))
+                else if (s.toLowerCase().startsWith("boots"))
                 {
                     slot = 0;
                 }
@@ -1227,21 +1227,23 @@ public class mod_IngameInfo extends BaseMod
             
             if (itemStack != null)
             {
-                if (s.endsWith("name"))
+                if (s.toLowerCase().endsWith("name"))
                 {
                     String arrows = itemStack.itemID == Item.bow.itemID ? " (" + HUDUtils.countInInventory(mc.thePlayer, Item.arrow.itemID, -1) + ")" : "";
                     return itemStack.getDisplayName() + arrows;
                 }
-                else if (s.endsWith("maxdamage"))
+                else if (s.toLowerCase().endsWith("maxdamage"))
                     return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getMaxDamage() + 1 : 0);
-                else if (s.endsWith("damage"))
+                else if (s.toLowerCase().endsWith("damage"))
                     return Integer.toString(itemStack.isItemStackDamageable() ? itemStack.getItemDamageForDisplay() : 0);
-                else if (s.endsWith("damageleft"))
+                else if (s.toLowerCase().endsWith("damageleft"))
                     return Integer.toString(itemStack.isItemStackDamageable() ? (itemStack.getMaxDamage() + 1) - itemStack.getItemDamageForDisplay() : 0);
                 
             }
-            else
+            else if (s.toLowerCase().contains("damage"))
                 return "0";
+            else
+                return "";
         }
         
         try
