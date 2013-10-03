@@ -13,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -26,7 +27,9 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.client.ClientCommandHandler;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import bspkrs.client.util.HUDUtils;
@@ -50,6 +53,7 @@ public class mod_IngameInfo extends BaseMod
     String                    fileName;
     private boolean           enabled       = true;
     private boolean           isForgeEnv    = false;
+    public static KeyBinding  toggleKey     = new KeyBinding("IngameInfo Toggle", Keyboard.KEY_I);
     
     @BSProp(info = "Valid memory unit strings are KB, MB, GB")
     public static String      memoryUnit    = "MB";
@@ -78,7 +82,7 @@ public class mod_IngameInfo extends BaseMod
     @Override
     public String getVersion()
     {
-        return "ML " + Const.MCVERSION + ".r03";
+        return "ML " + Const.MCVERSION + ".r04";
     }
     
     @Override
@@ -140,7 +144,7 @@ public class mod_IngameInfo extends BaseMod
     {
         loadFormatFile();
         
-        ModLoader.addCommand(new CommandIGI());
+        ModLoader.registerKey(this, toggleKey, false);
         ModLoader.addLocalization("commands.igi.usage", "igi [reload/enable/disable/toggle]");
         
         allowUpdateCheck = mod_bspkrsCore.allowUpdateCheck;
@@ -153,6 +157,15 @@ public class mod_IngameInfo extends BaseMod
         ModLoader.setInGameHook(this, true, false);
         
         isForgeEnv = ForgeUtils.isForgeEnv();
+        
+        try
+        {
+            ClientCommandHandler.instance.registerCommand(new CommandIGI());
+        }
+        catch (Throwable e)
+        {
+            ModLoader.addCommand(new CommandIGI());
+        }
     }
     
     @Override
@@ -200,6 +213,13 @@ public class mod_IngameInfo extends BaseMod
         }
         
         return true;
+    }
+    
+    @Override
+    public void keyboardEvent(KeyBinding event)
+    {
+        if (event.equals(toggleKey) && Keyboard.isKeyDown(Keyboard.KEY_LMENU))
+            enabled = !enabled;
     }
     
     private String[] loadText(File file)
@@ -1286,6 +1306,12 @@ public class mod_IngameInfo extends BaseMod
         public String getCommandUsage(ICommandSender icommandsender)
         {
             return "commands.igi.usage";
+        }
+        
+        @Override
+        public boolean canCommandSenderUseCommand(ICommandSender par1iCommandSender)
+        {
+            return true;
         }
         
         @Override
