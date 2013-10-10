@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package bspkrs.ingameinfo;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -7,16 +7,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumMovingObjectType;
@@ -27,79 +23,114 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.client.ClientCommandHandler;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import bspkrs.client.util.HUDUtils;
-import bspkrs.util.BSProp;
-import bspkrs.util.BSPropRegistry;
+import bspkrs.util.BSLog;
 import bspkrs.util.BlockID;
 import bspkrs.util.CommonUtils;
-import bspkrs.util.Const;
+import bspkrs.util.Configuration;
 import bspkrs.util.Coord;
-import bspkrs.util.ForgeUtils;
-import bspkrs.util.ModVersionChecker;
 
-public class mod_IngameInfo extends BaseMod
+public class IngameInfo
 {
-    private final Minecraft   mc;
-    private ScaledResolution  scaledResolution;
-    private int               alignMode;
-    int                       rowNum[];
-    int                       rowCount[];
-    String                    text[];
-    String                    fileName;
-    private boolean           enabled       = true;
-    private boolean           isForgeEnv    = false;
-    public static KeyBinding  toggleKey     = new KeyBinding("IngameInfo Toggle", Keyboard.KEY_I);
+    public static final String      VERSION_NUMBER    = "1.6.4.r05";
     
-    @BSProp(info = "Valid memory unit strings are KB, MB, GB")
-    public static String      memoryUnit    = "MB";
-    @BSProp(info = "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)")
-    public static String      xOffsets      = "2, 0, 2, 2, 0, 2, 2, 0, 2";
-    public static int[]       xOffset;
-    @BSProp(info = "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)")
-    public static String      yOffsets      = "2, 2, 2, 0, 0, 0, 2, 41, 2";
-    public static int[]       yOffset;
-    @BSProp(info = "Set to true to show info when chat is open, false to disable info when chat is open\n\n**ONLY EDIT WHAT IS BELOW THIS**")
-    public static boolean     showInChat    = false;
-    private final String[]    defaultConfig = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
-    private final String      configPath;
+    public static final Minecraft   mc                = Minecraft.getMinecraft();
+    private static ScaledResolution scaledResolution;
+    private static int              alignMode;
+    static int                      rowNum[];
+    static int                      rowCount[];
+    static String                   text[];
+    protected static boolean        enabled           = true;
+    public static KeyBinding        toggleKey         = new KeyBinding("IngameInfo Toggle", Keyboard.KEY_I);
     
-    private ModVersionChecker versionChecker;
-    private boolean           allowUpdateCheck;
-    private final String      versionURL    = Const.VERSION_URL + "/Minecraft/" + Const.MCVERSION + "/ingameInfo.version";
-    private final String      mcfTopic      = "http://www.minecraftforum.net/topic/1009577-";
+    // Config fields
+    public static String            memoryUnit        = "MB";
+    public static String            xOffsets          = "2, 0, 2, 2, 0, 2, 2, 0, 2";
+    public static int[]             xOffset;
+    public static String            yOffsets          = "2, 2, 2, 0, 0, 0, 2, 41, 2";
+    public static int[]             yOffset;
+    public static boolean           showInChat        = false;
     
-    @Override
-    public String getName()
+    private static final String[]   defaultConfig     = { "<topleft>&fDay <day> (<daytime[&e/&8]><mctime[12]>&f) <slimes[<darkgreen>/&b]><biome>", "Light: <max[<lightnosunfeet>/7[&e/&c]]><max[<lightnosunfeet>/9[&a/]]><lightnosunfeet>", "&fXP: &e<xpthislevel>&f / &e<xpcap>", "Time: &b<rltime[h:mma]>" };
+    private static final String     configPath        = "/config/IngameInfo/";
+    private static final String     fileName          = "ingameInfo.txt";
+    
+    public static Configuration     config;
+    public static boolean           allowDebugLogging = true;
+    
+    public static void loadConfig(File file)
     {
-        return "IngameInfo";
+        String ctgyGen = Configuration.CATEGORY_GENERAL;
+        
+        if (!CommonUtils.isObfuscatedEnv())
+        { // debug settings for deobfuscated execution
+          //            if (file.exists())
+          //                file.delete();
+        }
+        
+        config = new Configuration(file);
+        
+        config.load();
+        
+        memoryUnit = config.getString("memoryUnit", ctgyGen, memoryUnit,
+                "Valid memory unit strings are KB, MB, GB");
+        xOffsets = config.getString("xOffsets", ctgyGen, xOffsets,
+                "Horizontal offsets from the edge of the screen (when using right alignments the x offset is relative to the right edge of the screen)");
+        yOffsets = config.getString("yOffsets", ctgyGen, yOffsets,
+                "Vertical offsets for each alignment position starting at top left (when using bottom alignments the y offset is relative to the bottom edge of the screen)");
+        showInChat = config.getBoolean("showInChat", ctgyGen, showInChat,
+                "Set to true to show info when chat is open, false to disable info when chat is open");
+        
+        config.save();
+        
+        loadFormatFile();
     }
     
-    @Override
-    public String getVersion()
+    public static boolean onTickInGame()
     {
-        return "ML " + Const.MCVERSION + ".r04";
+        if (enabled && (mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
+        {
+            scaledResolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+            rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            String lines[] = text;
+            int i = lines.length;
+            
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            
+            for (int j = 0; j < i; j++)
+            {
+                try
+                {
+                    String s = lines[j];
+                    s = replaceAllTags(s);
+                    mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
+                    rowNum[alignMode]++;
+                }
+                catch (Throwable e)
+                {
+                    mc.thePlayer.addChatMessage(String.format("IngameInfo encountered an exception parsing ingameInfo.txt. Check %s for details.", CommonUtils.getLogFileName()));
+                    e.printStackTrace();
+                    enabled = false;
+                }
+            }
+            
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+        
+        return true;
     }
     
-    @Override
-    public String getPriorities()
+    public static void keyboardEvent(KeyBinding event)
     {
-        return "required-after:mod_bspkrsCore";
+        if (event.equals(toggleKey) && Keyboard.isKeyDown(Keyboard.KEY_LMENU))
+            enabled = !enabled;
     }
     
-    public mod_IngameInfo()
-    {
-        BSPropRegistry.registerPropHandler(this.getClass());
-        mc = ModLoader.getMinecraftInstance();
-        configPath = "/config/IngameInfo/";
-        fileName = "ingameInfo.txt";
-    }
-    
-    public void loadFormatFile()
+    public static void loadFormatFile()
     {
         alignMode = 0;
         rowCount = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -139,90 +170,7 @@ public class mod_IngameInfo extends BaseMod
             yOffset[i] = CommonUtils.parseInt(o[i].trim());
     }
     
-    @Override
-    public void load()
-    {
-        loadFormatFile();
-        
-        ModLoader.registerKey(this, toggleKey, false);
-        ModLoader.addLocalization("commands.igi.usage", "igi [reload/enable/disable/toggle]");
-        
-        allowUpdateCheck = mod_bspkrsCore.allowUpdateCheck;
-        if (allowUpdateCheck)
-        {
-            versionChecker = new ModVersionChecker(getName(), getVersion(), versionURL, mcfTopic);
-            versionChecker.checkVersionWithLogging();
-        }
-        
-        ModLoader.setInGameHook(this, true, false);
-        
-        isForgeEnv = ForgeUtils.isForgeEnv();
-        
-        try
-        {
-            ClientCommandHandler.instance.registerCommand(new CommandIGI());
-        }
-        catch (Throwable e)
-        {
-            ModLoader.addCommand(new CommandIGI());
-        }
-    }
-    
-    @Override
-    public boolean onTickInGame(float f, Minecraft mc)
-    {
-        if (enabled && (mc.inGameHasFocus || mc.currentScreen == null || (mc.currentScreen instanceof GuiChat && showInChat)) && !mc.gameSettings.showDebugInfo)
-        {
-            scaledResolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-            rowNum = (new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-            String lines[] = text;
-            int i = lines.length;
-            
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            //mc.renderEngine.resetBoundTexture();
-            
-            for (int j = 0; j < i; j++)
-            {
-                try
-                {
-                    String s = lines[j];
-                    s = replaceAllTags(s);
-                    // if(!(alignMode == 6 && mc.currentScreen != null &&
-                    // mc.currentScreen instanceof GuiChat)) //if chat is open, don't display bottomleft info
-                    mc.fontRenderer.drawStringWithShadow(s, getX(mc.fontRenderer.getStringWidth(HUDUtils.stripCtrl(s))), getY(rowCount[alignMode], rowNum[alignMode]), 0xffffff);
-                    rowNum[alignMode]++;
-                }
-                catch (Throwable e)
-                {
-                    mc.thePlayer.addChatMessage(String.format("IngameInfo encountered an exception parsing ingameInfo.txt. Check %s for details.", CommonUtils.getLogFileName()));
-                    e.printStackTrace();
-                    enabled = false;
-                }
-            }
-            
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        
-        if (allowUpdateCheck && versionChecker != null)
-        {
-            if (!versionChecker.isCurrentVersion())
-                for (String msg : versionChecker.getInGameMessage())
-                    mc.thePlayer.addChatMessage(msg);
-            allowUpdateCheck = false;
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        
-        return true;
-    }
-    
-    @Override
-    public void keyboardEvent(KeyBinding event)
-    {
-        if (event.equals(toggleKey) && Keyboard.isKeyDown(Keyboard.KEY_LMENU))
-            enabled = !enabled;
-    }
-    
-    private String[] loadText(File file)
+    private static String[] loadText(File file)
     {
         ArrayList arraylist = new ArrayList();
         Scanner scanner = null;
@@ -236,22 +184,24 @@ public class mod_IngameInfo extends BaseMod
         }
         catch (Throwable e)
         {
-            ModLoader.getLogger().log(Level.WARNING, "Error getting ingameInfo.txt: " + e.getMessage());
+            BSLog.warning("Error reading ingameInfo.txt: " + e.getMessage());
             e.printStackTrace();
             if (scanner != null)
                 scanner.close();
             
             return new String[] { "" };
         }
+        
         while (scanner.hasNextLine())
         {
             arraylist.add(scanner.nextLine());
         }
+        
         scanner.close();
         return (String[]) arraylist.toArray(new String[arraylist.size()]);
     }
     
-    private File createFile()
+    private static File createFile()
     {
         File file = new File(CommonUtils.getMinecraftDir(), configPath);
         
@@ -278,7 +228,7 @@ public class mod_IngameInfo extends BaseMod
         return null;
     }
     
-    private int getX(int width)
+    private static int getX(int width)
     {
         if (alignMode == 1 || alignMode == 4 || alignMode == 7)
             return scaledResolution.getScaledWidth() / 2 - width / 2 + xOffset[alignMode];
@@ -288,7 +238,7 @@ public class mod_IngameInfo extends BaseMod
             return xOffset[alignMode];
     }
     
-    private int getY(int rowCount, int rowNum)
+    private static int getY(int rowCount, int rowNum)
     {
         if (alignMode == 3 || alignMode == 4 || alignMode == 5)
             return (scaledResolution.getScaledHeight() / 2) - (rowCount * 10 / 2) + (rowNum * 10) + yOffset[alignMode];
@@ -298,14 +248,14 @@ public class mod_IngameInfo extends BaseMod
             return (rowNum * 10) + yOffset[alignMode];
     }
     
-    private String replaceAllTags(String s)
+    private static String replaceAllTags(String s)
     {
         for (; s.indexOf('<') != -1; s = replaceTags(s))
         {}
         return s.replaceAll("&", "\247");
     }
     
-    private String replaceTags(String s)
+    private static String replaceTags(String s)
     {
         int startIndex = s.indexOf('<');
         int endIndex = s.indexOf('>');
@@ -324,7 +274,7 @@ public class mod_IngameInfo extends BaseMod
         }
     }
     
-    public String getTag(String s)
+    public static String getTag(String s)
     {
         Coord coord = new Coord(MathHelper.floor_double(mc.thePlayer.posX), MathHelper.floor_double(mc.thePlayer.posY), MathHelper.floor_double(mc.thePlayer.posZ));
         
@@ -1276,7 +1226,7 @@ public class mod_IngameInfo extends BaseMod
         }
     }
     
-    private String parseBoolean(String s, Boolean boolean1)
+    private static String parseBoolean(String s, Boolean boolean1)
     {
         String s1 = "";
         if (s.indexOf('[') == -1 || s.indexOf('/') == -1 || s.indexOf(']') == -1)
@@ -1292,57 +1242,5 @@ public class mod_IngameInfo extends BaseMod
             s1 = s.substring(s.indexOf('/') + 1, s.indexOf(']'));
         }
         return s1;
-    }
-    
-    public class CommandIGI extends CommandBase
-    {
-        @Override
-        public String getCommandName()
-        {
-            return "igi";
-        }
-        
-        @Override
-        public String getCommandUsage(ICommandSender icommandsender)
-        {
-            return "commands.igi.usage";
-        }
-        
-        @Override
-        public boolean canCommandSenderUseCommand(ICommandSender par1iCommandSender)
-        {
-            return true;
-        }
-        
-        @Override
-        public void processCommand(ICommandSender icommandsender, String[] args)
-        {
-            if (args.length == 1)
-            {
-                if (args[0].equalsIgnoreCase("reload"))
-                {
-                    loadFormatFile();
-                    enabled = true;
-                    return;
-                }
-                else if (args[0].equalsIgnoreCase("enable"))
-                {
-                    enabled = true;
-                    return;
-                }
-                else if (args[0].equalsIgnoreCase("disable"))
-                {
-                    enabled = false;
-                    return;
-                }
-                else if (args[0].equalsIgnoreCase("toggle"))
-                {
-                    enabled = !enabled;
-                    return;
-                }
-            }
-            
-            throw new WrongUsageException("commands.igi.usage", new Object[0]);
-        }
     }
 }
