@@ -1,7 +1,7 @@
 IngameInfo
 =================
 DaftPVF's IngameInfo mod for Minecraft.  Displays many different details for the player/world on the in-game HUD.
-This repo contains source files for ModLoader (dependant on bspkrsCore).
+This repo contains source files for Forge (dependant on bspkrsCore).
 
 ### Links of Interest
  - [Official Minecraft Forum Thread](http://www.minecraftforum.net/topic/1009577-)
