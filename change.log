@@ -1,3 +1,5 @@
+1.6.4.r05 - ???
+- ported existing code to Forge
 1.6.4.r04 - 03-Oct-2013
 - added keybinding of ALT + I to toggle IngameInfo
 - changed registration of /igi command to work with ClientCommandHandler
