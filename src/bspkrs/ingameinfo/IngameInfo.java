@@ -172,7 +172,7 @@ public class IngameInfo
     
     private static String[] loadText(File file)
     {
-        ArrayList arraylist = new ArrayList();
+        ArrayList<String> arraylist = new ArrayList<String>();
         Scanner scanner = null;
         if (!file.exists())
         {
@@ -198,7 +198,7 @@ public class IngameInfo
         }
         
         scanner.close();
-        return (String[]) arraylist.toArray(new String[arraylist.size()]);
+        return arraylist.toArray(new String[arraylist.size()]);
     }
     
     private static File createFile()
