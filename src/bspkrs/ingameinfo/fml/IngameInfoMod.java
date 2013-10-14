@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
-import bspkrs.fml.util.bspkrsCoreProxy;
+import bspkrs.bspkrscore.fml.bspkrsCoreMod;
 import bspkrs.ingameinfo.CommandIGI;
 import bspkrs.ingameinfo.IngameInfo;
 import bspkrs.util.Const;
@@ -22,7 +22,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(name = "IngameInfo", modid = "IngameInfo", version = "Forge " + IngameInfo.VERSION_NUMBER, dependencies = "required-after:mod_bspkrsCore", useMetadata = true)
+@Mod(name = "IngameInfo", modid = "IngameInfo", version = "Forge " + IngameInfo.VERSION_NUMBER, dependencies = "required-after:bspkrsCore", useMetadata = true)
 public class IngameInfoMod
 {
     public static ModVersionChecker versionChecker;
@@ -37,21 +37,16 @@ public class IngameInfoMod
     @Instance(value = "IngameInfo")
     public static IngameInfoMod     instance;
     
-    public IngameInfoMod()
-    {
-        new bspkrsCoreProxy();
-    }
-    
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
         metadata = event.getModMetadata();
         IngameInfo.loadConfig(event.getSuggestedConfigurationFile());
         
-        if (bspkrsCoreProxy.instance.allowUpdateCheck)
+        if (bspkrsCoreMod.instance.allowUpdateCheck)
         {
             versionChecker = new ModVersionChecker(metadata.name, metadata.version, versionURL, mcfTopic);
-            versionChecker.checkVersionWithLoggingBySubStringAsFloat(metadata.version.length() - 1, metadata.version.length());
+            versionChecker.checkVersionWithLogging();
         }
     }
     

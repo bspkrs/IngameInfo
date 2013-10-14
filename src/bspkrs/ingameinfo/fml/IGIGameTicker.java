@@ -2,7 +2,7 @@ package bspkrs.ingameinfo.fml;
 
 import java.util.EnumSet;
 
-import bspkrs.fml.util.bspkrsCoreProxy;
+import bspkrs.bspkrscore.fml.bspkrsCoreMod;
 import bspkrs.ingameinfo.IngameInfo;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -11,7 +11,7 @@ public class IGIGameTicker implements ITickHandler
 {
     private EnumSet<TickType> tickTypes        = EnumSet.noneOf(TickType.class);
     
-    private boolean           allowUpdateCheck = bspkrsCoreProxy.instance.allowUpdateCheck;
+    private boolean           allowUpdateCheck = bspkrsCoreMod.instance.allowUpdateCheck;
     
     public IGIGameTicker(EnumSet<TickType> tickTypes)
     {
@@ -52,14 +52,14 @@ public class IGIGameTicker implements ITickHandler
         if (allowUpdateCheck && IngameInfo.mc != null && IngameInfo.mc.thePlayer != null)
         {
             if (IngameInfoMod.versionChecker != null)
-                if (!IngameInfoMod.versionChecker.isCurrentVersionBySubStringAsFloatNewer(IngameInfoMod.metadata.version.length() - 2, IngameInfoMod.metadata.version.length()))
+                if (!IngameInfoMod.versionChecker.isCurrentVersion())
                     for (String msg : IngameInfoMod.versionChecker.getInGameMessage())
                         IngameInfo.mc.thePlayer.addChatMessage(msg);
             
             allowUpdateCheck = false;
         }
         
-        return false; //IngameInfo.onTickInGame();
+        return allowUpdateCheck; //IngameInfo.onTickInGame();
     }
     
     @Override
